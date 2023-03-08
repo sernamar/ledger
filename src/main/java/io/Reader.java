@@ -1,9 +1,6 @@
 package io;
 
-import core.Account;
-import core.Entry;
-import core.Journal;
-import core.Transaction;
+import core.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -38,8 +35,8 @@ public class Reader {
         // header
         var header = parseTransactionHeader(lines[0]);
         var date = LocalDate.parse(header.get(0), DateTimeFormatter.ofPattern("yyyy/MM/dd"));
-        var status = header.get(1); // not using the transaction status for now
-        var note = header.get(2);
+        var status = getTransactionStatus(header.get(1));
+        var payee = header.get(2);
         //entries
         var entries = new ArrayList<Entry>();
         for (int i = 1; i < lines.length; i++) {
@@ -48,7 +45,17 @@ public class Reader {
             var amount = Double.parseDouble(entry.get(1));
             entries.add(new Entry(account, amount));
         }
-        return new Transaction(date, note, entries);
+        return new Transaction(date, status, payee, entries);
+    }
+
+    private static TransactionStatus getTransactionStatus(String statusSymbol) {
+        TransactionStatus status;
+        if (statusSymbol != null && statusSymbol.equals("!")) {
+            status = TransactionStatus.PENDING;
+        } else {
+            status = TransactionStatus.CLEARED;
+        }
+        return status;
     }
 
     static ArrayList<String> parseTransactionHeader(String line) {

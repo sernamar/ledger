@@ -3,6 +3,7 @@ package io;
 import core.Account;
 import core.Entry;
 import core.Transaction;
+import core.TransactionStatus;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -47,7 +48,7 @@ class ReaderTest {
 
     @Test
     void testParseTransaction() {
-        // transaction 1
+        // cleared transaction
         var transaction1 = """
                 2023/03/06 * Opening Balance
                     Assets:Cash                                  500
@@ -56,18 +57,19 @@ class ReaderTest {
                 """;
 
         var date = LocalDate.parse("2023/03/06", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
-        var note = "Opening Balance";
+        var status = TransactionStatus.CLEARED;
+        var payee = "Opening Balance";
         var entries = new ArrayList<Entry>();
         entries.add(new Entry(new Account("Assets:Cash"), 500));
         entries.add(new Entry(new Account("Assets:Debit Card"), 500));
         entries.add(new Entry(new Account("Equity:Opening Balances"), -1000));
-        var expected1 = new Transaction(date, note, entries);
+        var expected1 = new Transaction(date, status, payee, entries);
 
         assertEquals(expected1, parseTransaction(transaction1));
 
-        // transaction 2
+        // pending transaction
         var transaction2 = """
-                2023/03/07 Moe's restaurant
+                2023/03/07 ! Moe's restaurant
                     Expenses:Restaurant:Food                      20
                     Expenses:Restaurant:Tips                       2
                     Assets:Cash                                  -12
@@ -75,17 +77,18 @@ class ReaderTest {
                 """;
 
         date = LocalDate.parse("2023/03/07", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
-        note = "Moe's restaurant";
+        status = TransactionStatus.PENDING;
+        payee = "Moe's restaurant";
         entries = new ArrayList<>();
         entries.add(new Entry(new Account("Expenses:Restaurant:Food"), 20));
         entries.add(new Entry(new Account("Expenses:Restaurant:Tips"), 2));
         entries.add(new Entry(new Account("Assets:Cash"), -12));
         entries.add(new Entry(new Account("Assets:Debit Card"), -10));
-        var expected2 = new Transaction(date, note, entries);
+        var expected2 = new Transaction(date, status, payee, entries);
 
         assertEquals(expected2, parseTransaction(transaction2));
 
-        // transaction 3
+        // no-status transaction
         var transaction3 = """
                 2023/03/07 Mike's convenience store
                     Expenses:Groceries                         35.95
@@ -93,11 +96,12 @@ class ReaderTest {
                 """;
 
         date = LocalDate.parse("2023/03/07", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
-        note = "Mike's convenience store";
+        status = TransactionStatus.CLEARED;
+        payee = "Mike's convenience store";
         entries = new ArrayList<>();
         entries.add(new Entry(new Account("Expenses:Groceries"), 35.95));
         entries.add(new Entry(new Account("Assets:Cash"), -35.95));
-        var expected3 = new Transaction(date, note, entries);
+        var expected3 = new Transaction(date, status, payee, entries);
 
         assertEquals(expected3, parseTransaction(transaction3));
     }

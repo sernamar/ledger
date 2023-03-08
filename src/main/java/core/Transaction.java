@@ -7,5 +7,5 @@ import java.util.List;
  * Represents a transaction (a group of entries).
  */
 
-public record Transaction (LocalDate date, String note, List<Entry> entries){
+public record Transaction (LocalDate date, TransactionStatus status, String payee, List<Entry> entries){
 }
