@@ -2,6 +2,7 @@ package io;
 
 import core.Account;
 import core.Entry;
+import core.Journal;
 import core.Transaction;
 
 import java.io.IOException;
@@ -15,20 +16,18 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class Reader {
-    public static void main(String[] args) {
-        var filename = "example.ledger";
-        parseFile(filename);
-    }
 
-    public static void parseFile(String filename){
+    public static Journal readFile(String filename){
         try {
+            var journal = new Journal();
             var fileURI = Objects.requireNonNull(Reader.class.getClassLoader().getResource(filename)).toURI();
             var content = Files.readString((Path.of(fileURI)));
             var RawTransactions = content.split("(\n\n)|(\n*$)");
             for (var rawTransaction: RawTransactions) {
                 var transaction = parseTransaction(rawTransaction);
-                System.out.println(transaction);
+                journal.addTransaction(transaction);
             }
+            return journal;
         } catch (URISyntaxException | IOException e) {
             throw new RuntimeException(e);
         }
