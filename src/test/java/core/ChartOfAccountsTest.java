@@ -20,18 +20,18 @@ class ChartOfAccountsTest {
     }
 
     @Test
-    void hasAccount() {
+    void contains() {
         var chartOfAccounts = new ChartOfAccounts();
         chartOfAccounts.addAccount(new Account("Assets"));
 
         // existing account
         var existingAccount = new Account("Assets");
-        var result1 = chartOfAccounts.hasAccount(existingAccount);
+        var result1 = chartOfAccounts.contains(existingAccount);
         assertTrue(result1);
 
         // new account
         var newAccount = new Account("Liabilities");
-        var result2 = chartOfAccounts.hasAccount(newAccount);
+        var result2 = chartOfAccounts.contains(newAccount);
         assertFalse(result2);
     }
 }

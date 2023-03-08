@@ -26,7 +26,7 @@ public class ChartOfAccounts {
         return accounts.add(account);
     }
 
-    public boolean hasAccount(Account account) {
+    public boolean contains(Account account) {
         return accounts.contains(account);
     }
 }
