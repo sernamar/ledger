@@ -54,25 +54,22 @@ public class Reader {
 
     static ArrayList<String> parseTransactionHeader(String line) {
         var pattern = Pattern.compile("(^.*?(?=\\s))\\s?([*!])?\\s(.*)");
-        var header = new ArrayList<String>();
-        var matcher = pattern.matcher(line);
-        if (matcher.find()) {
-            for (int i = 1; i <= matcher.groupCount(); i++) {
-                header.add(matcher.group(i));
-            }
-        }
-        return header;
+        return getMatches(line, pattern);
     }
 
     static ArrayList<String> parseEntry(String line) {
         var pattern = Pattern.compile("\\s+(.*?(?=\\s{2,}))\\s+(.*)");
-        var entry = new ArrayList<String>();
+        return getMatches(line, pattern);
+    }
+
+    private static ArrayList<String> getMatches(String line, Pattern pattern) {
+        var matches = new ArrayList<String>();
         var matcher = pattern.matcher(line);
         if (matcher.find()) {
             for (int i = 1; i <= matcher.groupCount(); i++) {
-                entry.add(matcher.group(i));
+                matches.add(matcher.group(i));
             }
         }
-        return entry;
+        return matches;
     }
 }
