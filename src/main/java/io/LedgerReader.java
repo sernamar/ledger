@@ -47,7 +47,7 @@ public class LedgerReader implements Reader {
         // header
         var header = parseTransactionHeader(lines[0]);
         var date = LocalDate.parse(header.get(0), DateTimeFormatter.ofPattern("yyyy/MM/dd"));
-        var status = getTransactionStatus(header.get(1));
+        var status = (header.get(1) != null) ? getTransactionStatus(header.get(1)) : null;
         var payee = header.get(2);
         //entries
         var entries = new ArrayList<Entry>();
@@ -62,13 +62,11 @@ public class LedgerReader implements Reader {
     }
 
     private TransactionStatus getTransactionStatus(String statusSymbol) {
-        TransactionStatus status;
-        if (statusSymbol != null && statusSymbol.equals("!")) {
-            status = TransactionStatus.PENDING;
-        } else {
-            status = TransactionStatus.CLEARED;
-        }
-        return status;
+        return switch (statusSymbol) {
+            case "*" -> TransactionStatus.CLEARED;
+            case "!" -> TransactionStatus.PENDING;
+            default -> null;
+        };
     }
 
     protected ArrayList<String> parseTransactionHeader(String line) {

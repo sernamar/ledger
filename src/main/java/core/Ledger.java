@@ -16,6 +16,10 @@ public class Ledger {
         return accounts.getAccounts();
     }
 
+    public Journal getJournal() {
+        return journal;
+    }
+
     public List<Transaction> getTransactions() {
         return journal.getTransactions();
     }

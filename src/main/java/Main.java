@@ -1,4 +1,5 @@
 import io.LedgerReader;
+import io.LedgerWriter;
 
 import java.nio.file.Path;
 
@@ -15,15 +16,18 @@ public class Main {
         var accounts = ledger.getAccounts();
         System.out.println("--- Accounts ---");
         for (var a : accounts) {
-            System.out.println(a);
+            System.out.println(a.getName());
         }
         System.out.println();
 
-        // print transactions
-        var transactions = ledger.getTransactions();
-        System.out.println("--- Transactions ---");
-        for (var t : transactions) {
-            System.out.println(t);
-        }
+        // print journal to standard output
+        var writer = new LedgerWriter();
+        System.out.println("--- Journal ---");
+        writer.writeJournal(ledger.getJournal());
+
+        // save journal to file
+        var outputFilename = "src/main/resources/output.ledger";
+        var outputFile = Path.of(outputFilename);
+        writer.writeJournal(ledger.getJournal(), outputFile);
     }
 }
