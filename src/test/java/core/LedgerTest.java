@@ -1,9 +1,5 @@
-package io;
+package core;
 
-import core.Account;
-import core.Entry;
-import core.Transaction;
-import core.TransactionStatus;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -11,43 +7,44 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static io.Reader.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ReaderTest {
+class LedgerTest {
+    private final Ledger ledger = new Ledger();
+
     @Test
-    void testParseTransactionHeader() {
+    void parseTransactionHeader() {
         // header with status
         var header1 = "2023/03/06 * Opening Balance";
         var expected1 = new ArrayList<>(Arrays.asList("2023/03/06", "*", "Opening Balance"));
-        assertEquals(expected1, parseTransactionHeader(header1));
+        assertEquals(expected1, ledger.parseTransactionHeader(header1));
 
         // header without status
         var header2 = "2023/03/07 Moe's restaurant";
         var expected2 = new ArrayList<>(Arrays.asList("2023/03/07", null, "Moe's restaurant"));
-        assertEquals(expected2, parseTransactionHeader(header2));
+        assertEquals(expected2, ledger.parseTransactionHeader(header2));
     }
 
     @Test
-    void testParseEntry() {
+    void parseEntry() {
         // account without spaces, positive number
         var entry1 = "    Assets:Cash                                  500";
         var expected1 = new ArrayList<>(Arrays.asList("Assets:Cash", "500"));
-        assertEquals(expected1, parseEntry(entry1));
+        assertEquals(expected1, ledger.parseEntry(entry1));
 
         // account without spaces, negative number
         var entry2 = "    Equity:Opening Balances                    -1000";
         var expected2 = new ArrayList<>(Arrays.asList("Equity:Opening Balances", "-1000"));
-        assertEquals(expected2, parseEntry(entry2));
+        assertEquals(expected2, ledger.parseEntry(entry2));
 
         // account with two colons
         var entry3 = "    Expenses:Restaurant:Food                      20";
         var expected3 = new ArrayList<>(Arrays.asList("Expenses:Restaurant:Food", "20"));
-        assertEquals(expected3, parseEntry(entry3));
+        assertEquals(expected3, ledger.parseEntry(entry3));
     }
 
     @Test
-    void testParseTransaction() {
+    void parseTransaction() {
         // cleared transaction
         var transaction1 = """
                 2023/03/06 * Opening Balance
@@ -65,7 +62,7 @@ class ReaderTest {
         entries.add(new Entry(new Account("Equity:Opening Balances"), -1000));
         var expected1 = new Transaction(date, status, payee, entries);
 
-        assertEquals(expected1, parseTransaction(transaction1));
+        assertEquals(expected1, ledger.parseTransaction(transaction1));
 
         // pending transaction
         var transaction2 = """
@@ -86,7 +83,7 @@ class ReaderTest {
         entries.add(new Entry(new Account("Assets:Debit Card"), -10));
         var expected2 = new Transaction(date, status, payee, entries);
 
-        assertEquals(expected2, parseTransaction(transaction2));
+        assertEquals(expected2, ledger.parseTransaction(transaction2));
 
         // no-status transaction
         var transaction3 = """
@@ -103,6 +100,6 @@ class ReaderTest {
         entries.add(new Entry(new Account("Assets:Cash"), -35.95));
         var expected3 = new Transaction(date, status, payee, entries);
 
-        assertEquals(expected3, parseTransaction(transaction3));
+        assertEquals(expected3, ledger.parseTransaction(transaction3));
     }
 }

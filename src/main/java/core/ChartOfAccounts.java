@@ -26,6 +26,12 @@ public class ChartOfAccounts {
         return accounts.add(account);
     }
 
+    public Account addAccount(String accountName) {
+        var account = new Account(accountName);
+        addAccount(account);
+        return account;
+    }
+
     public boolean contains(Account account) {
         return accounts.contains(account);
     }
