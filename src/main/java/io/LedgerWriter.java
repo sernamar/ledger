@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 /**
@@ -58,7 +59,7 @@ public class LedgerWriter implements Writer {
     private String buildHeader(Transaction t) {
         var header = new StringBuilder();
 
-        var date = t.date();
+        var date = t.date().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
         var status = t.status();
         var payee = t.payee();
 
