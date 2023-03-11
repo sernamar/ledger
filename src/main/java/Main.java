@@ -19,16 +19,15 @@ public class Main {
 
         // print accounts
         var accounts = ledger.getAccounts();
-        System.out.println("--- Accounts ---");
+        System.out.println("\n--- Accounts ---");
         for (var a : accounts) {
             System.out.println(a.getName());
         }
-        System.out.println();
 
         // print journal to standard output
         var journal = ledger.getJournal();
         var writer = new LedgerWriter();
-        System.out.println("--- Journal ---");
+        System.out.println("\n--- Journal ---");
         writer.writeJournal(journal);
 
         // save journal to file
@@ -41,10 +40,17 @@ public class Main {
         }
 
         // get balance
-        System.out.println("Balance for Equity: " + journal.getBalance("Equity"));
+        System.out.println("\nBalance for Assets: " + journal.getBalance("Assets"));
         var start = "2023/03/05";
         var end = "2023/03/07";
         System.out.println("Balance for Cash between " + start + " and " + end + ": " +
                 journal.getBalance("Cash", start, end));
+
+        // get balance report
+        System.out.println("\n--- Balance Report for Assets ---");
+        System.out.println(journal.getBalanceReport("Assets"));
+
+        System.out.println("\n--- Balance Report for Cash between " + start + " and " + end + " ---");
+        System.out.println(journal.getBalanceReport("Cash", start, end));
     }
 }
