@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Locale;
 
 /**
  * Writes a journal to a file stored using the Ledger format.
@@ -82,7 +83,7 @@ public class LedgerWriter implements Writer {
         try {
             entry.append(String.format("%8d", amount.intValueExact()));
         } catch (ArithmeticException exception) {
-            entry.append(String.format("%8.2f", amount.doubleValue()));
+            entry.append(String.format(new Locale("en", "US"), "%8.2f", amount.doubleValue()));
         }
         return entry.toString();
     }
