@@ -26,17 +26,25 @@ public class Main {
         System.out.println();
 
         // print journal to standard output
+        var journal = ledger.getJournal();
         var writer = new LedgerWriter();
         System.out.println("--- Journal ---");
-        writer.writeJournal(ledger.getJournal());
+        writer.writeJournal(journal);
 
         // save journal to file
         var outputFilename = "src/main/resources/output.ledger";
         var outputFile = Path.of(outputFilename);
         try {
-            writer.writeJournal(ledger.getJournal(), outputFile);
+            writer.writeJournal(journal, outputFile);
         } catch (IOException e) {
             logger.error(e);
         }
+
+        // get balance
+        System.out.println("Balance for Equity: " + journal.getBalanceBetweenDates("Equity"));
+        var start = "2023/03/05";
+        var end = "2023/03/07";
+        System.out.println("Balance for Cash between " + start + " and " + end + ": " +
+                journal.getBalanceBetweenDates("Cash", start, end));
     }
 }

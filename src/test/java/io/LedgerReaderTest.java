@@ -99,7 +99,7 @@ class LedgerReaderTest {
                 """;
 
         var date3 = LocalDate.parse("2023/03/07", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
-        var status3 = TransactionStatus.CLEARED;
+        TransactionStatus status3 = null;
         var payee3 = "Mike's convenience store";
         var entries3 = new ArrayList<Entry>();
         entries3.add(new Entry(new Account("Expenses:Groceries"), 35.95));

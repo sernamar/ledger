@@ -1,8 +1,11 @@
 package core;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-
 /**
  * Represents a journal (a group of transactions).
  */
@@ -20,5 +23,27 @@ public class Journal {
 
     public List<Transaction> getTransactions() {
         return transactions;
+    }
+
+    public BigDecimal getBalanceBetweenDates(String accountName) {
+        return transactions.stream()
+                .map(Transaction::entries)
+                .flatMap(Collection::stream)
+                .filter(e -> e.account().getName().contains(accountName))
+                .map(Entry::amount)
+                .reduce(BigDecimal.valueOf(0), BigDecimal::add);
+    }
+
+    public BigDecimal getBalanceBetweenDates(String accountName, String startDate, String endDate) {
+        var start = LocalDate.parse(startDate, DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+        var end = LocalDate.parse(endDate, DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+
+        return transactions.stream()
+                .filter(t -> !(t.date().isBefore(start) || t.date().isAfter(end)))
+                .map(Transaction::entries)
+                .flatMap(Collection::stream)
+                .filter(e -> e.account().getName().contains(accountName))
+                .map(Entry::amount)
+                .reduce(BigDecimal.valueOf(0), BigDecimal::add);
     }
 }
