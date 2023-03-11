@@ -32,37 +32,24 @@ public class LedgerWriter implements Writer {
     }
 
     @Override
-    public void writeJournal(Journal journal, Path path) {
-        try {
-            Files.write(path, "".getBytes());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public void writeJournal(Journal journal, Path path) throws IOException {
+        Files.write(path, "".getBytes());  // truncate the file if it exists, or create it if it doesn't exist
         var transactions = journal.getTransactions();
-        for (int i=0; i < transactions.size(); i++) { // doing a classic for loop to do something different in the last transaction
+        // using a classic for loop because we need to do something different in the last transaction
+        for (int i = 0; i < transactions.size(); i++) {
             var transaction = transactions.get(i);
+            // write header
             var header = buildHeader(transaction) + "\n";
-            try {
-                Files.write(path, header.getBytes(), StandardOpenOption.APPEND);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            Files.write(path, header.getBytes(), StandardOpenOption.APPEND);
+            // write entries
             var entries = transaction.entries();
             for (var e : entries) {
                 var entry = buildEntry(e) + "\n";
-                try {
-                    Files.write(path, entry.getBytes(), StandardOpenOption.APPEND);
-                } catch (IOException exception) {
-                    throw new RuntimeException(exception);
-                }
+                Files.write(path, entry.getBytes(), StandardOpenOption.APPEND);
             }
             // add a new line between transactions, but not after the last one
             if (i < transactions.size() - 1) {
-                try {
-                    Files.write(path, "\n".getBytes(), StandardOpenOption.APPEND);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                Files.write(path, "\n".getBytes(), StandardOpenOption.APPEND);
             }
         }
     }
@@ -100,3 +87,4 @@ public class LedgerWriter implements Writer {
         return entry.toString();
     }
 }
+

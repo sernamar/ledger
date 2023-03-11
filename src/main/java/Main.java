@@ -1,9 +1,14 @@
 import io.LedgerReader;
 import io.LedgerWriter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+
+import java.io.IOException;
 import java.nio.file.Path;
 
 public class Main {
+    private final static Logger logger = LogManager.getLogger();
 
     public static void main(String[] args) {
         var filename = "src/main/resources/example.ledger";
@@ -28,6 +33,10 @@ public class Main {
         // save journal to file
         var outputFilename = "src/main/resources/output.ledger";
         var outputFile = Path.of(outputFilename);
-        writer.writeJournal(ledger.getJournal(), outputFile);
+        try {
+            writer.writeJournal(ledger.getJournal(), outputFile);
+        } catch (IOException e) {
+            logger.error(e);
+        }
     }
 }
