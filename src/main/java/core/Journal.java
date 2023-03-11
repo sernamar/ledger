@@ -25,7 +25,7 @@ public class Journal {
         return transactions;
     }
 
-    public BigDecimal getBalanceBetweenDates(String accountName) {
+    public BigDecimal getBalance(String accountName) {
         return transactions.stream()
                 .map(Transaction::entries)
                 .flatMap(Collection::stream)
@@ -34,7 +34,7 @@ public class Journal {
                 .reduce(BigDecimal.valueOf(0), BigDecimal::add);
     }
 
-    public BigDecimal getBalanceBetweenDates(String accountName, String startDate, String endDate) {
+    public BigDecimal getBalance(String accountName, String startDate, String endDate) {
         var start = LocalDate.parse(startDate, DateTimeFormatter.ofPattern("yyyy/MM/dd"));
         var end = LocalDate.parse(endDate, DateTimeFormatter.ofPattern("yyyy/MM/dd"));
 

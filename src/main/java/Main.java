@@ -41,10 +41,10 @@ public class Main {
         }
 
         // get balance
-        System.out.println("Balance for Equity: " + journal.getBalanceBetweenDates("Equity"));
+        System.out.println("Balance for Equity: " + journal.getBalance("Equity"));
         var start = "2023/03/05";
         var end = "2023/03/07";
         System.out.println("Balance for Cash between " + start + " and " + end + ": " +
-                journal.getBalanceBetweenDates("Cash", start, end));
+                journal.getBalance("Cash", start, end));
     }
 }

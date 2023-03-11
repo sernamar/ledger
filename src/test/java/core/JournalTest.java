@@ -46,11 +46,11 @@ class JournalTest {
 
     @Test
     void getBalance() {
-        var balance1 = journal.getBalanceBetweenDates("Equity");
+        var balance1 = journal.getBalance("Equity");
         var expected1 = BigDecimal.valueOf(-1000.0);
         assertEquals(expected1, balance1);
 
-        var balance2 = journal.getBalanceBetweenDates("Cash");
+        var balance2 = journal.getBalance("Cash");
         var expected2 = BigDecimal.valueOf(452.05);
         assertEquals(expected2, balance2);
     }
@@ -58,17 +58,17 @@ class JournalTest {
     @Test
     void getBalanceBetweenDates() {
         // dates before any date in the journal
-        var balance1 = journal.getBalanceBetweenDates("Cash", "2023/03/01", "2023/03/01");
+        var balance1 = journal.getBalance("Cash", "2023/03/01", "2023/03/01");
         var expected1 = BigDecimal.valueOf(0);
         assertEquals(expected1, balance1);
 
         // dates that only include a single +500 cash transaction
-        var balance2 = journal.getBalanceBetweenDates("Cash", "2023/03/01", "2023/03/06");
+        var balance2 = journal.getBalance("Cash", "2023/03/01", "2023/03/06");
         var expected2 = BigDecimal.valueOf(500.0);
         assertEquals(expected2, balance2);
 
         // dates that include all cash transactions in the journal
-        var balance3 = journal.getBalanceBetweenDates("Cash", "2023/03/01", "2023/03/31");
+        var balance3 = journal.getBalance("Cash", "2023/03/01", "2023/03/31");
         var expected3 = BigDecimal.valueOf(452.05);
         assertEquals(expected3, balance3);
     }
