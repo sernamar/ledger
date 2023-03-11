@@ -5,6 +5,7 @@ import core.Journal;
 import core.Transaction;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -78,15 +79,26 @@ public class LedgerWriter implements Writer {
         var entry = new StringBuilder();
 
         var accountName = e.account().getName();
-        var amount = e.amount();
-
         entry.append(String.format("    %-40s", accountName));
-        try {
-            entry.append(String.format("%8d", amount.intValueExact()));
-        } catch (ArithmeticException exception) {
-            entry.append(String.format(new Locale("en", "US"), "%8.2f", amount.doubleValue()));
-        }
+
+        var amount = e.amount();
+        var formattedAmount = getFormattedAmount(amount);
+        entry.append(formattedAmount);
+
         return entry.toString();
+    }
+
+    private String getFormattedAmount(BigDecimal amount) {
+        /*
+         `intValueExtract()` is a `BigDecimal` method that throws an `ArithmeticException` if `amount` has a nonzero
+         fractional part, which means that it cannot be converted to an `int`: instead, we convert it to a `double` in
+         the `catch` expression.
+        */
+        try {
+            return String.format("%8d", amount.intValueExact());
+        } catch (ArithmeticException exception) {
+            return String.format(new Locale("en", "US"), "%8.2f", amount.doubleValue());
+        }
     }
 }
 
