@@ -56,7 +56,7 @@ public class LedgerWriter implements Writer {
         }
     }
 
-    private String buildHeader(Transaction t) {
+    protected String buildHeader(Transaction t) {
         var header = new StringBuilder();
 
         var date = t.date().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
@@ -74,7 +74,7 @@ public class LedgerWriter implements Writer {
         return header.toString();
     }
 
-    private String buildEntry(Entry e) {
+    protected String buildEntry(Entry e) {
         var entry = new StringBuilder();
 
         var accountName = e.account().getName();
