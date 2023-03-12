@@ -1,15 +1,11 @@
 import io.LedgerReader;
 import io.LedgerWriter;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 
 import java.io.IOException;
 import java.nio.file.Path;
 
 public class Main {
-    private final static Logger logger = LogManager.getLogger();
-
     public static void main(String[] args) {
         var filename = "src/main/resources/example.ledger";
         var file = Path.of(filename);
@@ -31,12 +27,13 @@ public class Main {
         writer.writeJournal(journal);
 
         // save journal to file
-        var outputFilename = "src/main/resources/output.ledger";
+        // var outputFilename = "src/main/resources/output.ledger";
+        var outputFilename = "/opt/output.ledger";
         var outputFile = Path.of(outputFilename);
         try {
             writer.writeJournal(journal, outputFile);
         } catch (IOException e) {
-            logger.error(e);
+            System.out.println("Error writing the journal to a file. Cause: " + e);
         }
 
         // get balance
