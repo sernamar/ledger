@@ -1,6 +1,8 @@
 package core;
 
-import java.math.BigDecimal;
+import org.joda.money.CurrencyUnit;
+import org.joda.money.Money;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -15,9 +17,15 @@ import java.util.stream.Stream;
 
 public class Journal {
     private final List<Transaction> transactions;
+    private final CurrencyUnit defaultCurrency;
 
     public Journal() {
         transactions = new ArrayList<>();
+        defaultCurrency = CurrencyUnit.of(Locale.getDefault());
+    }
+
+    public CurrencyUnit getDefaultCurrency() {
+        return defaultCurrency;
     }
 
     public void addTransaction (Transaction transaction) {
@@ -28,19 +36,19 @@ public class Journal {
         return transactions;
     }
 
-    public BigDecimal getBalance(String accountName) {
+    public Money getBalance(String accountName) {
         return filterEntriesBy(accountName)
                 .map(Entry::amount)
-                .reduce(BigDecimal.valueOf(0), BigDecimal::add);
+                .reduce(Money.zero(defaultCurrency), Money::plus);
     }
 
-    public BigDecimal getBalance(String accountName, String startDate, String endDate) {
+    public Money getBalance(String accountName, String startDate, String endDate) {
         var start = LocalDate.parse(startDate, DateTimeFormatter.ofPattern("yyyy/MM/dd"));
         var end = LocalDate.parse(endDate, DateTimeFormatter.ofPattern("yyyy/MM/dd"));
 
         return filterEntriesBy(accountName, start, end)
                 .map(Entry::amount)
-                .reduce(BigDecimal.valueOf(0), BigDecimal::add);
+                .reduce(Money.zero(defaultCurrency), Money::plus);
     }
 
     public String getBalanceReport(String accountName) {
@@ -48,12 +56,11 @@ public class Journal {
         var entries = filterEntriesBy(accountName).toList();
         for (var entry : entries) {
             var name = entry.account().getName();
-            var amount = getFormattedAmount(entry.amount());
-            report.append(amount).append(String.format("  %s\n", name));
+            var amount = entry.amount();
+            report.append(String.format("  %s", amount)).append(String.format("  %s\n", name));
         }
         report.append("-----------------------------------------------------\n");
-        var balance = getFormattedAmount(getBalance(accountName));
-        report.append(balance).append("\n");
+        report.append(String.format("  %s\n", getBalance(accountName)));
 
         return report.toString();
     }
@@ -66,12 +73,11 @@ public class Journal {
         var entries = filterEntriesBy(accountName, start, end).toList();
         for (var entry : entries) {
             var name = entry.account().getName();
-            var amount = getFormattedAmount(entry.amount());
-            report.append(amount).append(String.format("  %s\n", name));
+            var amount = entry.amount();
+            report.append(String.format("  %s", amount)).append(String.format("  %s\n", name));
         }
         report.append("-----------------------------------------------------\n");
-        var balance = getFormattedAmount(getBalance(accountName, startDate, endDate));
-        report.append(balance).append("\n");
+        report.append(String.format("  %s\n", getBalance(accountName, startDate, endDate)));
 
         return report.toString();
     }
@@ -89,18 +95,5 @@ public class Journal {
                 .map(Transaction::entries)
                 .flatMap(Collection::stream)
                 .filter(e -> e.account().getName().contains(accountName));
-    }
-
-    private String getFormattedAmount(BigDecimal amount) {
-        /*
-         `intValueExtract()` is a `BigDecimal` method that throws an `ArithmeticException` if `amount` has a nonzero
-         fractional part, which means that it cannot be converted to an `int`: instead, we convert it to a `double` in
-         the `catch` expression.
-        */
-        try {
-            return String.format("%8d", amount.intValueExact());
-        } catch (ArithmeticException exception) {
-            return String.format(new Locale("en", "US"), "%8.2f", amount.doubleValue());
-        }
     }
 }

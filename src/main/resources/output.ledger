@@ -1,14 +1,14 @@
 2023/03/06 * Opening Balance
-    Assets:Cash                                  500
-    Assets:Debit Card                            500
-    Equity:Opening Balances                    -1000
+    Assets:Cash                                       EUR 500.00
+    Assets:Debit Card                                 EUR 500.00
+    Equity:Opening Balances                           EUR -1000.00
 
 2023/03/07 Moe's restaurant
-    Expenses:Restaurant:Food                      20
-    Expenses:Restaurant:Tips                       2
-    Assets:Cash                                  -12
-    Assets:Debit Card                            -10
+    Expenses:Restaurant:Food                          EUR 20.00
+    Expenses:Restaurant:Tips                          EUR 2.00
+    Assets:Cash                                       EUR -12.00
+    Assets:Debit Card                                 EUR -10.00
 
 2023/03/07 Mike's convenience store
-    Expenses:Groceries                         35.95
-    Assets:Cash                               -35.95
+    Expenses:Groceries                                EUR 35.95
+    Assets:Cash                                       EUR -35.95

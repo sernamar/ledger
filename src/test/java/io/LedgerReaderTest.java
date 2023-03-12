@@ -4,6 +4,8 @@ import core.Account;
 import core.Entry;
 import core.Transaction;
 import core.TransactionStatus;
+import org.joda.money.CurrencyUnit;
+import org.joda.money.Money;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -12,11 +14,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 
 class LedgerReaderTest {
 
     private final LedgerReader reader = new LedgerReader();
+    private final CurrencyUnit currency = CurrencyUnit.EUR;
 
     @Test
     void parseTransactionHeader() {
@@ -63,9 +67,9 @@ class LedgerReaderTest {
         var status1 = TransactionStatus.CLEARED;
         var payee1 = "Opening Balance";
         var entries1 = new ArrayList<Entry>();
-        entries1.add(new Entry(new Account("Assets:Cash"), 500));
-        entries1.add(new Entry(new Account("Assets:Debit Card"), 500));
-        entries1.add(new Entry(new Account("Equity:Opening Balances"), -1000));
+        entries1.add(new Entry(new Account("Assets:Cash"), Money.of(currency, 500)));
+        entries1.add(new Entry(new Account("Assets:Debit Card"), Money.of(currency, 500)));
+        entries1.add(new Entry(new Account("Equity:Opening Balances"), Money.of(currency, -1000)));
         var expected1 = new Transaction(date1, status1, payee1, entries1);
 
         assertEquals(expected1, reader.parseTransaction(transaction1));
@@ -83,10 +87,10 @@ class LedgerReaderTest {
         var status2 = TransactionStatus.PENDING;
         var payee2 = "Moe's restaurant";
         var entries2 = new ArrayList<Entry>();
-        entries2.add(new Entry(new Account("Expenses:Restaurant:Food"), 20));
-        entries2.add(new Entry(new Account("Expenses:Restaurant:Tips"), 2));
-        entries2.add(new Entry(new Account("Assets:Cash"), -12));
-        entries2.add(new Entry(new Account("Assets:Debit Card"), -10));
+        entries2.add(new Entry(new Account("Expenses:Restaurant:Food"), Money.of(currency, 20)));
+        entries2.add(new Entry(new Account("Expenses:Restaurant:Tips"), Money.of(currency, 2)));
+        entries2.add(new Entry(new Account("Assets:Cash"), Money.of(currency, -12)));
+        entries2.add(new Entry(new Account("Assets:Debit Card"), Money.of(currency, -10)));
         var expected2 = new Transaction(date2, status2, payee2, entries2);
 
         assertEquals(expected2, reader.parseTransaction(transaction2));
@@ -99,13 +103,42 @@ class LedgerReaderTest {
                 """;
 
         var date3 = LocalDate.parse("2023/03/07", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
-        TransactionStatus status3 = null;
         var payee3 = "Mike's convenience store";
         var entries3 = new ArrayList<Entry>();
-        entries3.add(new Entry(new Account("Expenses:Groceries"), 35.95));
-        entries3.add(new Entry(new Account("Assets:Cash"), -35.95));
-        var expected3 = new Transaction(date3, status3, payee3, entries3);
+        entries3.add(new Entry(new Account("Expenses:Groceries"), Money.of(currency, 35.95)));
+        entries3.add(new Entry(new Account("Assets:Cash"), Money.of(currency, -35.95)));
+        var expected3 = new Transaction(date3, null, payee3, entries3);
 
         assertEquals(expected3, reader.parseTransaction(transaction3));
+    }
+
+    @Test
+    void parseAmount() {
+        var amount = "2";
+        var expected = Money.of(currency, 2);
+        assertEquals(expected, reader.parseAmount(amount));
+
+        amount = "2.95";
+        expected = Money.of(currency, 2.95);
+        assertEquals(expected, reader.parseAmount(amount));
+
+        amount = "EUR 2";
+        expected = Money.of(currency, 2);
+        assertEquals(expected, reader.parseAmount(amount));
+
+        amount = "EUR 2.95";
+        expected = Money.of(currency, 2.95);
+        assertEquals(expected, reader.parseAmount(amount));
+
+        amount = "2 EUR";
+        expected = Money.of(currency, 2);
+        assertEquals(expected, reader.parseAmount(amount));
+
+        amount = "2.95 EUR";
+        expected = Money.of(currency, 2.95);
+        assertEquals(expected, reader.parseAmount(amount));
+
+        amount = "foo bar baz";
+        assertNull(reader.parseAmount(amount));
     }
 }

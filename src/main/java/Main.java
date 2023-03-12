@@ -27,8 +27,7 @@ public class Main {
         writer.writeJournal(journal);
 
         // save journal to file
-        // var outputFilename = "src/main/resources/output.ledger";
-        var outputFilename = "/opt/output.ledger";
+        var outputFilename = "src/main/resources/output.ledger";
         var outputFile = Path.of(outputFilename);
         try {
             writer.writeJournal(journal, outputFile);
@@ -37,7 +36,7 @@ public class Main {
         }
 
         // get balance
-        System.out.println("\nBalance for Assets: " + journal.getBalance("Assets"));
+        System.out.println("Balance for Assets: " + journal.getBalance("Assets"));
         var start = "2023/03/05";
         var end = "2023/03/07";
         System.out.println("Balance for Cash between " + start + " and " + end + ": " +

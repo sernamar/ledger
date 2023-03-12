@@ -1,6 +1,8 @@
 package io;
 
 import core.*;
+import org.joda.money.CurrencyUnit;
+import org.joda.money.Money;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -55,7 +57,8 @@ public class LedgerReader implements Reader {
             var entry = parseEntry(lines[i]);
             var accountName = entry.get(0);
             var account = accounts.addAccount(accountName);
-            var amount = Double.parseDouble(entry.get(1));
+            var amountStr = entry.get(1);
+            var amount = parseAmount(amountStr);
             entries.add(new Entry(account, amount));
         }
         return new Transaction(date, status, payee, entries);
@@ -77,6 +80,30 @@ public class LedgerReader implements Reader {
     protected ArrayList<String> parseEntry(String line) {
         var pattern = Pattern.compile("\\s+(.*?(?=\\s{2,}))\\s+(.*)");
         return getMatches(line, pattern);
+    }
+
+    protected Money parseAmount(String amountStr) {
+        Pattern currencyAmountPattern = Pattern.compile("(\\w+)\\s([+-]?\\d+\\.?\\d*)");
+        Pattern amountCurrencyPattern = Pattern.compile("([+-]?\\d+\\.?\\d*)\\s(\\w+)");
+        Pattern amountOnlyPattern = Pattern.compile("([+-]?\\d+.?\\d*)");
+        CurrencyUnit currency;
+        double amount;
+        var currencyAmountMatches = getMatches(amountStr, currencyAmountPattern);
+        var amountCurrencyMatches = getMatches(amountStr, amountCurrencyPattern);
+        var amountOnlyMatches = getMatches(amountStr, amountOnlyPattern);
+        if (!currencyAmountMatches.isEmpty()) {
+            currency = CurrencyUnit.of(currencyAmountMatches.get(0));
+            amount   = Double.parseDouble(currencyAmountMatches.get(1));
+            return Money.of(currency, amount);
+        } else if (!amountCurrencyMatches.isEmpty()) {
+            amount = Double.parseDouble(amountCurrencyMatches.get(0));
+            currency = CurrencyUnit.of(amountCurrencyMatches.get(1));
+            return Money.of(currency, amount);
+        } else if (!amountOnlyMatches.isEmpty()) {
+                amount = Double.parseDouble(amountOnlyMatches.get(0));
+                return Money.of(journal.getDefaultCurrency(), amount);
+        }
+        return null;
     }
 
     private ArrayList<String> getMatches(String line, Pattern pattern) {

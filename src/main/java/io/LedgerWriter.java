@@ -5,12 +5,10 @@ import core.Journal;
 import core.Transaction;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 
 /**
  * Writes a journal to a file stored using the Ledger format.
@@ -79,26 +77,10 @@ public class LedgerWriter implements Writer {
         var entry = new StringBuilder();
 
         var accountName = e.account().getName();
-        entry.append(String.format("    %-40s", accountName));
-
-        var amount = e.amount();
-        var formattedAmount = getFormattedAmount(amount);
-        entry.append(formattedAmount);
+        entry.append(String.format("    %-50s", accountName));
+        entry.append(e.amount());
 
         return entry.toString();
-    }
-
-    private String getFormattedAmount(BigDecimal amount) {
-        /*
-         `intValueExtract()` is a `BigDecimal` method that throws an `ArithmeticException` if `amount` has a nonzero
-         fractional part, which means that it cannot be converted to an `int`: instead, we convert it to a `double` in
-         the `catch` expression.
-        */
-        try {
-            return String.format("%8d", amount.intValueExact());
-        } catch (ArithmeticException exception) {
-            return String.format(new Locale("en", "US"), "%8.2f", amount.doubleValue());
-        }
     }
 }
 

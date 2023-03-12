@@ -1,14 +1,9 @@
 package core;
 
-import java.math.BigDecimal;
+import org.joda.money.Money;
 
 /**
  * Represents a transaction entry.
  */
 
-public record Entry(Account account, BigDecimal amount) {
-
-    public Entry(Account account, double amount) {
-        this(account, BigDecimal.valueOf(amount)); // calls the (implicit) canonical constructor
-    }
-}
+public record Entry(Account account, Money amount) { }
