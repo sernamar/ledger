@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Stream;
 
 /**
  * Represents a journal (a group of transactions).
@@ -28,7 +27,7 @@ public class Journal {
         return defaultCurrency;
     }
 
-    public void addTransaction (Transaction transaction) {
+    public void addTransaction(Transaction transaction) {
         transactions.add(transaction);
     }
 
@@ -36,8 +35,15 @@ public class Journal {
         return transactions;
     }
 
+    /* =============== */
+    /* Balance methods */
+    /* =============== */
+
     public Money getBalance(String accountName) {
-        return filterEntriesBy(accountName)
+        return transactions.stream()
+                .map(Transaction::entries)
+                .flatMap(Collection::stream)
+                .filter(e -> e.account().getName().contains(accountName))
                 .map(Entry::amount)
                 .reduce(Money.zero(defaultCurrency), Money::plus);
     }
@@ -46,14 +52,22 @@ public class Journal {
         var start = LocalDate.parse(startDate, DateTimeFormatter.ofPattern("yyyy/MM/dd"));
         var end = LocalDate.parse(endDate, DateTimeFormatter.ofPattern("yyyy/MM/dd"));
 
-        return filterEntriesBy(accountName, start, end)
+        return transactions.stream()
+                .filter(t -> !(t.date().isBefore(start) || t.date().isAfter(end)))
+                .map(Transaction::entries)
+                .flatMap(Collection::stream)
+                .filter(e -> e.account().getName().contains(accountName))
                 .map(Entry::amount)
                 .reduce(Money.zero(defaultCurrency), Money::plus);
     }
 
     public String getBalanceReport(String accountName) {
         var report = new StringBuilder();
-        var entries = filterEntriesBy(accountName).toList();
+        var entries = transactions.stream()
+                .map(Transaction::entries)
+                .flatMap(Collection::stream)
+                .filter(e -> e.account().getName().contains(accountName))
+                .toList();
         for (var entry : entries) {
             var name = entry.account().getName();
             var amount = entry.amount();
@@ -70,7 +84,12 @@ public class Journal {
         var end = LocalDate.parse(endDate, DateTimeFormatter.ofPattern("yyyy/MM/dd"));
 
         var report = new StringBuilder();
-        var entries = filterEntriesBy(accountName, start, end).toList();
+        var entries = transactions.stream()
+                .filter(t -> !(t.date().isBefore(start) || t.date().isAfter(end)))
+                .map(Transaction::entries)
+                .flatMap(Collection::stream)
+                .filter(e -> e.account().getName().contains(accountName))
+                .toList();
         for (var entry : entries) {
             var name = entry.account().getName();
             var amount = entry.amount();
@@ -82,18 +101,163 @@ public class Journal {
         return report.toString();
     }
 
-    private Stream<Entry> filterEntriesBy(String accountName) {
+    /* ======================= */
+    /* Entry filtering methods */
+    /* ======================= */
+
+    // Methods that only filter transaction information
+    // ------------------------------------------------
+
+    public List<Entry> getEntriesByPayee(String payee) {
         return transactions.stream()
+                .filter(transaction -> transaction.payee().equals(payee))
                 .map(Transaction::entries)
                 .flatMap(Collection::stream)
-                .filter(e -> e.account().getName().contains(accountName));
+                .toList();
     }
 
-    private Stream<Entry> filterEntriesBy(String accountName, LocalDate start, LocalDate end) {
+    public List<Entry> getEntriesBy(LocalDate date) {
         return transactions.stream()
-                .filter(t -> !(t.date().isBefore(start) || t.date().isAfter(end)))
+                .filter(transaction -> transaction.date().equals(date))
                 .map(Transaction::entries)
                 .flatMap(Collection::stream)
-                .filter(e -> e.account().getName().contains(accountName));
+                .toList();
+    }
+
+    public List<Entry> getEntriesByPayee(String payee, LocalDate date) {
+        return transactions.stream()
+                .filter(transaction -> transaction.payee().equals(payee) && transaction.date().equals(date))
+                .map(Transaction::entries)
+                .flatMap(Collection::stream)
+                .toList();
+    }
+
+    // Methods that only filter entry information
+    // ------------------------------------------
+
+    public List<Entry> getEntriesByAccount(String accountName) {
+        return transactions.stream()
+                .map(Transaction::entries)
+                .flatMap(Collection::stream)
+                .filter(entry -> entry.account().getName().contains(accountName))
+                .toList();
+    }
+
+    public List<Entry> getEntriesBy(Money amount) {
+        return transactions.stream()
+                .map(Transaction::entries)
+                .flatMap(Collection::stream)
+                .filter(entry -> entry.amount().equals(amount))
+                .toList();
+    }
+
+    public List<Entry> getEntriesByAccount(String accountName, Money amount) {
+        return transactions.stream()
+                .map(Transaction::entries)
+                .flatMap(Collection::stream)
+                .filter(entry -> entry.account().getName().contains(accountName) && entry.amount().equals(amount))
+                .toList();
+    }
+
+    // Methods that filter both transaction and entry information
+    // ----------------------------------------------------------
+
+    public List<Entry> getEntriesByPayee(String payee, String accountName) {
+        return transactions.stream()
+                .filter(transaction -> transaction.payee().equals(payee))
+                .map(Transaction::entries)
+                .flatMap(Collection::stream)
+                .filter(entry -> entry.account().getName().contains(accountName))
+                .toList();
+    }
+
+    public List<Entry> getEntriesByAccount(String accountName, String payee) {
+        return transactions.stream()
+                .filter(transaction -> transaction.payee().equals(payee))
+                .map(Transaction::entries)
+                .flatMap(Collection::stream)
+                .filter(entry -> entry.account().getName().contains(accountName))
+                .toList();
+    }
+
+    public List<Entry> getEntriesByPayee(String payee, Money amount) {
+        return transactions.stream()
+                .filter(transaction -> transaction.payee().equals(payee))
+                .map(Transaction::entries)
+                .flatMap(Collection::stream)
+                .filter(entry -> entry.amount().equals(amount))
+                .toList();
+    }
+
+    public List<Entry> getEntriesByAccount(String accountName, LocalDate date) {
+        return transactions.stream()
+                .filter(transaction -> transaction.date().equals(date))
+                .map(Transaction::entries)
+                .flatMap(Collection::stream)
+                .filter(entry -> entry.account().getName().contains(accountName))
+                .toList();
+    }
+
+    public List<Entry> getEntriesBy(Money amount, LocalDate date) {
+        return transactions.stream()
+                .filter(transaction -> transaction.date().equals(date))
+                .map(Transaction::entries)
+                .flatMap(Collection::stream)
+                .filter(entry -> entry.amount().equals(amount))
+                .toList();
+    }
+
+    public List<Entry> getEntriesByPayee(String payee, String accountName, Money amount) {
+        return transactions.stream()
+                .filter(transaction -> transaction.payee().equals(payee))
+                .map(Transaction::entries)
+                .flatMap(Collection::stream)
+                .filter(entry -> entry.account().getName().contains(accountName) && entry.amount().equals(amount))
+                .toList();
+    }
+
+    public List<Entry> getEntriesByAccount(String accountName, String payee, Money amount) {
+        return transactions.stream()
+                .filter(transaction -> transaction.payee().equals(payee))
+                .map(Transaction::entries)
+                .flatMap(Collection::stream)
+                .filter(entry -> entry.account().getName().contains(accountName) && entry.amount().equals(amount))
+                .toList();
+    }
+
+    public List<Entry> getEntriesByPayee(String payee, String accountName, LocalDate date) {
+        return transactions.stream()
+                .filter(transaction -> transaction.payee().equals(payee) && transaction.date().equals(date))
+                .map(Transaction::entries)
+                .flatMap(Collection::stream)
+                .filter(entry -> entry.account().getName().contains(accountName))
+                .toList();
+    }
+
+    public List<Entry> getEntriesByAccount(String accountName, String payee, LocalDate date) {
+        return transactions.stream()
+                .filter(transaction -> transaction.payee().equals(payee) && transaction.date().equals(date))
+                .map(Transaction::entries)
+                .flatMap(Collection::stream)
+                .filter(entry -> entry.account().getName().contains(accountName))
+                .toList();
+    }
+
+    public List<Entry> getEntriesByPayee(String payee, LocalDate date, Money amount) {
+        return transactions.stream()
+                .filter(transaction -> transaction.payee().equals(payee) && transaction.date().equals(date))
+                .map(Transaction::entries)
+                .flatMap(Collection::stream)
+                .filter(entry -> entry.amount().equals(amount))
+                .toList();
+    }
+
+    public List<Entry> getEntriesByAccount(String accountName, LocalDate date, Money amount) {
+        return transactions.stream()
+                .filter(transaction -> transaction.date().equals(date))
+                .map(Transaction::entries)
+                .flatMap(Collection::stream)
+                .filter(entry -> entry.account().getName().contains(accountName) && entry.amount().equals(amount))
+                .toList();
     }
 }

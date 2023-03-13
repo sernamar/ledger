@@ -1,52 +1,158 @@
 import io.LedgerReader;
-import io.LedgerWriter;
+import org.joda.money.CurrencyUnit;
+import org.joda.money.Money;
 
 
-import java.io.IOException;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 public class Main {
     public static void main(String[] args) {
         var filename = "src/main/resources/example.ledger";
         var file = Path.of(filename);
         var reader = new LedgerReader();
-
         var ledger = reader.readJournal(file);
 
-        // print accounts
-        var accounts = ledger.getAccounts();
-        System.out.println("\n--- Accounts ---");
-        for (var a : accounts) {
-            System.out.println(a.getName());
-        }
-
-        // print journal to standard output
         var journal = ledger.getJournal();
-        var writer = new LedgerWriter();
-        System.out.println("\n--- Journal ---");
-        writer.writeJournal(journal);
 
-        // save journal to file
-        var outputFilename = "src/main/resources/output.ledger";
-        var outputFile = Path.of(outputFilename);
-        try {
-            writer.writeJournal(journal, outputFile);
-        } catch (IOException e) {
-            System.out.println("Error writing the journal to a file. Cause: " + e);
+        var payee = "Moe's restaurant";
+        var date = LocalDate.parse("2023/03/07", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+        var accountName = "Assets:Cash";
+        var amount = Money.of(CurrencyUnit.of(Locale.getDefault()), 500);
+
+        /* ============= */
+        /* Entry methods */
+        /* ============= */
+
+        // Methods that only filter transaction information
+        // ------------------------------------------------
+
+        // entries by payee = Moe's restaurant
+        var entries = journal.getEntriesByPayee(payee);
+        System.out.println("\n--- Entries by payee = Moe's restaurant ---");
+        for (var e : entries) {
+            System.out.println(e);
         }
 
-        // get balance
-        System.out.println("Balance for Assets: " + journal.getBalance("Assets"));
-        var start = "2023/03/05";
-        var end = "2023/03/07";
-        System.out.println("Balance for Cash between " + start + " and " + end + ": " +
-                journal.getBalance("Cash", start, end));
+        // entries by date = 2023/03/07
+        entries = journal.getEntriesBy(date);
+        System.out.println("\n--- Entries by date = 2023/03/07 ---");
+        for (var e : entries) {
+            System.out.println(e);
+        }
 
-        // get balance report
-        System.out.println("\n--- Balance Report for Assets ---");
-        System.out.println(journal.getBalanceReport("Assets"));
+        // entries by payee = Moe's restaurant, and date = 2023/03/07
+        entries = journal.getEntriesByPayee(payee, date);
+        System.out.println("\n--- Entries by payee = Moe's restaurant, and date = 2023/03/07 ---");
+        for (var e : entries) {
+            System.out.println(e);
+        }
 
-        System.out.println("\n--- Balance Report for Cash between " + start + " and " + end + " ---");
-        System.out.println(journal.getBalanceReport("Cash", start, end));
+        // Methods that only filter entry information
+        // ------------------------------------------
+
+        // entries by accountName = Assets:Cash
+        entries = journal.getEntriesByAccount(accountName);
+        System.out.println("\n--- Entries by accountName = Assets:Cash ---");
+        for (var e : entries) {
+            System.out.println(e);
+        }
+
+        // entries by amount = 500
+        entries = journal.getEntriesBy(amount);
+        System.out.println("\n--- Entries by amount = 500 ---");
+        for (var e : entries) {
+            System.out.println(e);
+        }
+
+        // entries by accountName = Assets:Cash, and amount = 500
+        entries = journal.getEntriesByAccount(accountName, amount);
+        System.out.println("\n--- Entries by accountName = Assets:Cash, and amount = 500 ---");
+        for (var e : entries) {
+            System.out.println(e);
+        }
+
+        // Methods that filter both transaction and entry information
+        // ----------------------------------------------------------
+
+        // entries by payee = Moe's restaurant, and accountName = Assets:Cash
+        entries = journal.getEntriesByPayee(payee, accountName);
+        System.out.println("\n--- Entries by payee = Moe's restaurant, and accountName = Assets:Cash ---");
+        for (var e : entries) {
+            System.out.println(e);
+        }
+
+        // entries by payee = Moe's restaurant, and accountName = Assets:Cash
+        entries = journal.getEntriesByAccount(accountName, payee);
+        System.out.println("\n--- Entries by accountName = Assets:Cash, and payee = Moe's restaurant ---");
+        for (var e : entries) {
+            System.out.println(e);
+        }
+
+        // entries by payee = Moe's restaurant, and amount = 500
+        entries = journal.getEntriesByPayee(payee, amount);
+        System.out.println("\n--- Entries by payee = Moe's restaurant, and amount = 500 ---");
+        for (var e : entries) {
+            System.out.println(e);
+        }
+
+        // entries by payee = Moe's restaurant, and date = 2023/03/07
+        entries = journal.getEntriesByAccount(accountName, date);
+        System.out.println("\n--- Entries by accountName = Assets:Cash, and and date = 2023/03/07 ---");
+        for (var e : entries) {
+            System.out.println(e);
+        }
+
+        // entries by amount = 500, and date = 2023/03/07
+        entries = journal.getEntriesBy(amount, date);
+        System.out.println("\n--- Entries by amount = 500, and date = 2023/03/07 ---");
+        for (var e : entries) {
+            System.out.println(e);
+        }
+
+        // entries by payee = Moe's restaurant, accountName = Assets:Cash, and amount = -12
+        amount = Money.of(CurrencyUnit.of(Locale.getDefault()), -12);
+        entries = journal.getEntriesByPayee(payee, accountName, amount);
+        System.out.println("\n--- Entries by payee = Moe's restaurant, accountName = Assets:Cash, and amount = -12 ---");
+        for (var e : entries) {
+            System.out.println(e);
+        }
+
+        // entries by payee = Moe's restaurant, accountName = Assets:Cash, and amount = -12
+        entries = journal.getEntriesByAccount(accountName, payee, amount);
+        System.out.println("\n--- Entries by payee = Moe's restaurant, accountName = Assets:Cash, and amount = -12 ---");
+        for (var e : entries) {
+            System.out.println(e);
+        }
+
+        // entries by payee = Moe's restaurant, accountName = Assets:Cash, and date = 2023/03/07
+        entries = journal.getEntriesByPayee(payee, accountName, date);
+        System.out.println("\n--- Entries by payee = Moe's restaurant, accountName = Assets:Cash, and date = 2023/03/07 ---");
+        for (var e : entries) {
+            System.out.println(e);
+        }
+
+        // entries by payee = Moe's restaurant, accountName = Assets:Cash, and date = 2023/03/07
+        entries = journal.getEntriesByAccount(accountName, payee, date);
+        System.out.println("\n--- Entries by payee = Moe's restaurant, accountName = Assets:Cash, and date = 2023/03/07 ---");
+        for (var e : entries) {
+            System.out.println(e);
+        }
+
+        // entries by payee = Moe's restaurant, date = 2023/03/07, and amount = -12
+        entries = journal.getEntriesByPayee(payee, date, amount);
+        System.out.println("\n--- Entries by payee = Moe's restaurant, and accountName = Assets:Cash ---");
+        for (var e : entries) {
+            System.out.println(e);
+        }
+
+        // entries by accountName = Assets:Cash, date = 2023/03/07, and amount = -12
+        entries = journal.getEntriesByAccount(accountName, date, amount);
+        System.out.println("\n--- Entries by payee = Moe's restaurant, accountName = Assets:Cash, , and amount = -12 ---");
+        for (var e : entries) {
+            System.out.println(e);
+        }
     }
 }
