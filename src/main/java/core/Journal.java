@@ -43,7 +43,7 @@ public class Journal {
         return transactions.stream()
                 .map(Transaction::entries)
                 .flatMap(Collection::stream)
-                .filter(e -> e.account().getName().contains(accountName))
+                .filter(entry -> entry.account().getName().contains(accountName))
                 .map(Entry::amount)
                 .reduce(Money.zero(defaultCurrency), Money::plus);
     }
@@ -53,7 +53,7 @@ public class Journal {
         var end = LocalDate.parse(endDate, DateTimeFormatter.ofPattern("yyyy/MM/dd"));
 
         return transactions.stream()
-                .filter(t -> !(t.date().isBefore(start) || t.date().isAfter(end)))
+                .filter(transaction -> !(transaction.date().isBefore(start) || transaction.date().isAfter(end)))
                 .map(Transaction::entries)
                 .flatMap(Collection::stream)
                 .filter(e -> e.account().getName().contains(accountName))
@@ -85,10 +85,10 @@ public class Journal {
 
         var report = new StringBuilder();
         var entries = transactions.stream()
-                .filter(t -> !(t.date().isBefore(start) || t.date().isAfter(end)))
+                .filter(transaction -> !(transaction.date().isBefore(start) || transaction.date().isAfter(end)))
                 .map(Transaction::entries)
                 .flatMap(Collection::stream)
-                .filter(e -> e.account().getName().contains(accountName))
+                .filter(entry -> entry.account().getName().contains(accountName))
                 .toList();
         for (var entry : entries) {
             var name = entry.account().getName();
