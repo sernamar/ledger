@@ -8,22 +8,28 @@ import org.joda.money.CurrencyUnit;
 import org.joda.money.Money;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junitpioneer.jupiter.DefaultLocale;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-
+@DefaultLocale("es-ES")
 class LedgerWriterTest {
-    private final LedgerWriter writer = new LedgerWriter();
-    private final List<Transaction> transactions = new ArrayList<>();
-    private final CurrencyUnit currency = CurrencyUnit.EUR;
+    private LedgerWriter writer;
+    private List<Transaction> transactions;
+    private CurrencyUnit currency;
 
     @BeforeEach
     void setUp() {
+        writer = new LedgerWriter();
+        transactions = new ArrayList<>();
+        currency = CurrencyUnit.of(Locale.getDefault());
+
         var date1 = LocalDate.parse("2023/03/06", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
         var status1 = TransactionStatus.CLEARED;
         var payee1 = "Opening Balance";

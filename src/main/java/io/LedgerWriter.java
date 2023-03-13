@@ -16,6 +16,8 @@ import java.time.format.DateTimeFormatter;
  *         Ledger 3 documentation - Journal File Format for Developers
  *       </a>)
  */
+
+
 public class LedgerWriter implements Writer {
     @Override
     public void writeJournal(Journal journal) {

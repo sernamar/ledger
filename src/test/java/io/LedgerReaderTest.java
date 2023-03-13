@@ -6,21 +6,31 @@ import core.Transaction;
 import core.TransactionStatus;
 import org.joda.money.CurrencyUnit;
 import org.joda.money.Money;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junitpioneer.jupiter.DefaultLocale;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 
+@DefaultLocale("es-ES")
 class LedgerReaderTest {
 
-    private final LedgerReader reader = new LedgerReader();
-    private final CurrencyUnit currency = CurrencyUnit.EUR;
+    private LedgerReader reader;
+    private CurrencyUnit currency;
+
+    @BeforeEach
+    void setUp() {
+        reader = new LedgerReader();
+        currency = CurrencyUnit.of(Locale.getDefault());
+    }
 
     @Test
     void parseTransactionHeader() {
