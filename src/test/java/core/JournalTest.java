@@ -79,4 +79,125 @@ class JournalTest {
         var expected3 = Money.of(currency, 452.05);
         assertEquals(expected3, balance3);
     }
+
+    @Test
+    void getEntriesByPayee() {
+        var payee = "Moe's restaurant";
+        var date = LocalDate.parse("2023/03/07", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+        var accountName = "Assets:Cash";
+        var amount = Money.of(CurrencyUnit.of(Locale.getDefault()), -12);
+
+        // List<Entry> getEntriesByPayee(String payee)
+        var entries = journal.getEntriesByPayee(payee);
+        var expected = new ArrayList<>();
+        expected.add(new Entry(new Account("Expenses:Restaurant:Food"), Money.of(currency, 20)));
+        expected.add(new Entry(new Account("Expenses:Restaurant:Tips"), Money.of(currency, 2)));
+        expected.add(new Entry(new Account("Assets:Cash"), Money.of(currency, -12)));
+        expected.add(new Entry(new Account("Assets:Debit Card"), Money.of(currency, -10)));
+        assertEquals(expected, entries);
+
+        // List<Entry> getEntriesByPayee(String payee, LocalDate date)
+        entries = journal.getEntriesByPayee(payee, date);
+        assertEquals(expected, entries);
+
+        // List<Entry> getEntriesByPayee(String payee, String accountName)
+        entries = journal.getEntriesByPayee(payee, accountName);
+        expected = new ArrayList<>();
+        expected.add(new Entry(new Account("Assets:Cash"), Money.of(currency, -12)));
+        assertEquals(expected, entries);
+
+        // List<Entry> getEntriesByPayee(String payee, Money amount)
+        entries = journal.getEntriesByPayee(payee, amount);
+        expected = new ArrayList<>();
+        expected.add(new Entry(new Account("Assets:Cash"), Money.of(currency, -12)));
+        assertEquals(expected, entries);
+
+        // List<Entry> getEntriesByPayee(String payee, String accountName, Money amount)
+        entries = journal.getEntriesByPayee(payee, accountName, amount);
+        assertEquals(expected, entries);
+
+        // List<Entry> getEntriesByPayee(String payee, String accountName, LocalDate date)
+        entries = journal.getEntriesByPayee(payee, accountName, date);
+        assertEquals(expected, entries);
+
+        // List<Entry> getEntriesByPayee(String payee, LocalDate date, Money amount)
+        entries = journal.getEntriesByPayee(payee, date, amount);
+        assertEquals(expected, entries);
+    }
+
+    @Test
+    void getEntriesByAccount() {
+        var payee = "Moe's restaurant";
+        var date = LocalDate.parse("2023/03/07", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+        var accountName = "Assets:Cash";
+        var amount = Money.of(CurrencyUnit.of(Locale.getDefault()), -12);
+
+        // List<Entry> getEntriesByAccount(String accountName)
+        var entries = journal.getEntriesByAccount(accountName);
+        var expected = new ArrayList<>();
+        expected.add(new Entry(new Account("Assets:Cash"), Money.of(currency, 500)));
+        expected.add(new Entry(new Account("Assets:Cash"), Money.of(currency, -12)));
+        expected.add(new Entry(new Account("Assets:Cash"), Money.of(currency, -35.95)));
+        assertEquals(expected, entries);
+
+        // List<Entry> getEntriesByAccount(String accountName, Money amount)
+        entries = journal.getEntriesByAccount(accountName, amount);
+        expected = new ArrayList<>();
+        expected.add(new Entry(new Account("Assets:Cash"), Money.of(currency, -12)));
+        assertEquals(expected, entries);
+
+        // List<Entry> getEntriesByAccount(String accountName, String payee)
+        entries = journal.getEntriesByAccount(accountName, payee);
+        assertEquals(expected, entries);
+
+        // List<Entry> getEntriesByAccount(String accountName, LocalDate date)
+        entries = journal.getEntriesByAccount(accountName, date);
+        expected = new ArrayList<>();
+        expected.add(new Entry(new Account("Assets:Cash"), Money.of(currency, -12)));
+        expected.add(new Entry(new Account("Assets:Cash"), Money.of(currency, -35.95)));
+        assertEquals(expected, entries);
+
+        // List<Entry> getEntriesByAccount(String accountName, String payee, Money amount)
+        entries = journal.getEntriesByAccount(accountName, payee, amount);
+        expected = new ArrayList<>();
+        expected.add(new Entry(new Account("Assets:Cash"), Money.of(currency, -12)));
+        assertEquals(expected, entries);
+
+        // List<Entry> getEntriesByAccount(String accountName, String payee, LocalDate date)
+        entries = journal.getEntriesByAccount(accountName, payee, date);
+        expected = new ArrayList<>();
+        expected.add(new Entry(new Account("Assets:Cash"), Money.of(currency, -12)));
+        assertEquals(expected, entries);
+
+        // List<Entry> getEntriesByAccount(String accountName, LocalDate date, Money amount)
+        entries = journal.getEntriesByAccount(accountName, date, amount);
+        assertEquals(expected, entries);
+    }
+
+    @Test
+    void getEntriesBy() {
+        var date = LocalDate.parse("2023/03/07", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+        var amount = Money.of(CurrencyUnit.of(Locale.getDefault()), -12);
+
+        // List<Entry> getEntriesBy(LocalDate date)
+        var entries = journal.getEntriesBy(date);
+        var expected = new ArrayList<>();
+        expected.add(new Entry(new Account("Expenses:Restaurant:Food"), Money.of(currency, 20)));
+        expected.add(new Entry(new Account("Expenses:Restaurant:Tips"), Money.of(currency, 2)));
+        expected.add(new Entry(new Account("Assets:Cash"), Money.of(currency, -12)));
+        expected.add(new Entry(new Account("Assets:Debit Card"), Money.of(currency, -10)));
+        expected.add(new Entry(new Account("Expenses:Groceries"), Money.of(currency, 35.95)));
+        expected.add(new Entry(new Account("Assets:Cash"), Money.of(currency, -35.95)));
+        assertEquals(expected, entries);
+
+        // List<Entry> getEntriesBy(Money amount)
+        entries = journal.getEntriesBy(amount);
+        expected = new ArrayList<>();
+        expected.add(new Entry(new Account("Assets:Cash"), Money.of(currency, -12)));
+        assertEquals(expected, entries);
+
+        // List<Entry> getEntriesBy(Money amount, LocalDate date)
+        entries = journal.getEntriesBy(amount, date);
+        assertEquals(expected, entries);
+    }
 }
