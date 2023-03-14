@@ -50,7 +50,7 @@ public class LedgerReader implements Reader {
         var header = parseTransactionHeader(lines[0]);
         var date = LocalDate.parse(header.get(0), DateTimeFormatter.ofPattern("yyyy/MM/dd"));
         var status = (header.get(1) != null) ? getTransactionStatus(header.get(1)) : null;
-        var payee = header.get(2);
+        var payee = new Payee(header.get(2));
         //entries
         var entries = new ArrayList<Entry>();
         for (int i = 1; i < lines.length; i++) {

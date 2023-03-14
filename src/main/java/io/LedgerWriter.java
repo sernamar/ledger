@@ -62,7 +62,7 @@ public class LedgerWriter implements Writer {
 
         var date = t.date().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
         var status = t.status();
-        var payee = t.payee();
+        var payee = t.payee().name();
 
         header.append(date);
         if (status != null) {

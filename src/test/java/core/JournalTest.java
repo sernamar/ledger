@@ -25,7 +25,7 @@ class JournalTest {
 
         var date1 = LocalDate.parse("2023/03/06", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
         var status1 = TransactionStatus.CLEARED;
-        var payee1 = "Opening Balance";
+        var payee1 = new Payee("Opening Balance");
         var entries1 = new ArrayList<Entry>();
         entries1.add(new Entry(new Account("Assets:Cash"), Money.of(currency, 500)));
         entries1.add(new Entry(new Account("Assets:Debit Card"), Money.of(currency, 500)));
@@ -34,7 +34,7 @@ class JournalTest {
 
         var date2 = LocalDate.parse("2023/03/07", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
         var status2 = TransactionStatus.PENDING;
-        var payee2 = "Moe's restaurant";
+        var payee2 = new Payee("Moe's restaurant");
         var entries2 = new ArrayList<Entry>();
         entries2.add(new Entry(new Account("Expenses:Restaurant:Food"), Money.of(currency, 20)));
         entries2.add(new Entry(new Account("Expenses:Restaurant:Tips"), Money.of(currency, 2)));
@@ -43,7 +43,7 @@ class JournalTest {
         journal.addTransaction(new Transaction(date2, status2, payee2, entries2));
 
         var date3 = LocalDate.parse("2023/03/07", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
-        var payee3 = "Mike's convenience store";
+        var payee3 = new Payee("Mike's convenience store");
         var entries3 = new ArrayList<Entry>();
         entries3.add(new Entry(new Account("Expenses:Groceries"), Money.of(currency, 35.95)));
         entries3.add(new Entry(new Account("Assets:Cash"), Money.of(currency, -35.95)));
@@ -209,7 +209,7 @@ class JournalTest {
 
         var date1 = LocalDate.parse("2023/03/06", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
         var status1 = TransactionStatus.CLEARED;
-        var payee1 = "Opening Balance";
+        var payee1 = new Payee("Opening Balance");
         var entries1 = new ArrayList<Entry>();
         entries1.add(new Entry(new Account("Assets:Cash"), Money.of(currency, 500)));
         entries1.add(new Entry(new Account("Assets:Debit Card"), Money.of(currency, 500)));
@@ -232,7 +232,7 @@ class JournalTest {
 
         var date2 = LocalDate.parse("2023/03/07", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
         var status2 = TransactionStatus.PENDING;
-        var payee2 = "Moe's restaurant";
+        var payee2 = new Payee("Moe's restaurant");
         var entries2 = new ArrayList<Entry>();
         entries2.add(new Entry(new Account("Expenses:Restaurant:Food"), Money.of(currency, 20)));
         entries2.add(new Entry(new Account("Expenses:Restaurant:Tips"), Money.of(currency, 2)));
@@ -246,7 +246,7 @@ class JournalTest {
         transactions = journal.getTransactions("2023/03/01", "2023/03/31");
 
         var date3 = LocalDate.parse("2023/03/07", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
-        var payee3 = "Mike's convenience store";
+        var payee3 = new Payee("Mike's convenience store");
         var entries3 = new ArrayList<Entry>();
         entries3.add(new Entry(new Account("Expenses:Groceries"), Money.of(currency, 35.95)));
         entries3.add(new Entry(new Account("Assets:Cash"), Money.of(currency, -35.95)));
@@ -258,7 +258,7 @@ class JournalTest {
     void accountInTransaction() {
         var date = LocalDate.parse("2023/03/06", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
         var status = TransactionStatus.CLEARED;
-        var payee = "Opening Balance";
+        var payee = new Payee("Opening Balance");
         var entries = new ArrayList<Entry>();
         entries.add(new Entry(new Account("Assets:Cash"), Money.of(currency, 500)));
         entries.add(new Entry(new Account("Assets:Debit Card"), Money.of(currency, 500)));
@@ -273,7 +273,7 @@ class JournalTest {
     void payeeInTransaction() {
         var date = LocalDate.parse("2023/03/06", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
         var status = TransactionStatus.CLEARED;
-        var payee = "Opening Balance";
+        var payee = new Payee("Opening Balance");
         var entries = new ArrayList<Entry>();
         entries.add(new Entry(new Account("Assets:Cash"), Money.of(currency, 500)));
         entries.add(new Entry(new Account("Assets:Debit Card"), Money.of(currency, 500)));
