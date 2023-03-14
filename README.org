@@ -1,2 +1,199 @@
 * ledger
 Double-entry accounting system.
+** How to use it
+*** Read a journal from a file into a ledger object
+For example:
+#+begin_src java
+  var filename = "src/main/resources/example.ledger";
+  var file = Path.of(filename);
+  
+  var reader = new LedgerReader();
+  var ledger = reader.readJournal(file);
+#+end_src
+*** Print a journal to the standard output
+Once we have read a journal file into a =ledger= object, we can print the journal to the standard output:
+#+begin_src java
+  var journal = ledger.getJournal();
+  var writer = new LedgerWriter();
+  writer.writeJournal(journal);
+#+end_src
+Output:
+#+begin_src shell
+  2023/03/06 * Opening Balance
+      Assets:Cash                                       EUR 500.00
+      Assets:Debit Card                                 EUR 500.00
+      Equity:Opening Balances                           EUR -1000.00
+
+  2023/03/07 Moe's restaurant
+      Expenses:Restaurant:Food                          EUR 20.00
+      Expenses:Restaurant:Tips                          EUR 2.00
+      Assets:Cash                                       EUR -12.00
+      Assets:Debit Card                                 EUR -10.00
+
+  2023/03/07 Mike's convenience store
+      Expenses:Groceries                                EUR 35.95
+      Assets:Cash                                       EUR -35.95
+#+end_src
+*** Write a journal to a file
+As before, once we have read a journal file into a =ledger= object, we can print the journal to a file:
+#+begin_src java
+  var outputFilename = "src/main/resources/output.ledger";
+  var outputFile = Path.of(outputFilename);
+
+  var journal = ledger.getJournal();
+  var writer = new LedgerWriter();
+  try {
+      writer.writeJournal(journal, outputFile);
+  } catch (IOException e) {
+      System.out.println("Error writing the journal to a file. Cause: " + e);
+  }
+#+end_src
+Resulting in a file with the following content:
+#+begin_src shell
+  2023/03/06 * Opening Balance
+      Assets:Cash                                       EUR 500.00
+      Assets:Debit Card                                 EUR 500.00
+      Equity:Opening Balances                           EUR -1000.00
+
+  2023/03/07 Moe's restaurant
+      Expenses:Restaurant:Food                          EUR 20.00
+      Expenses:Restaurant:Tips                          EUR 2.00
+      Assets:Cash                                       EUR -12.00
+      Assets:Debit Card                                 EUR -10.00
+
+  2023/03/07 Mike's convenience store
+      Expenses:Groceries                                EUR 35.95
+      Assets:Cash                                       EUR -35.95
+#+end_src
+
+*** Balance
+Given a =journal= object, we can get the balance of an =account= using the ~getBalance(...)~ method, which supports the following options:
+  - balance by account name: ~Money getBalance(String accountName)~.
+  - balance by account: ~Money getBalance(Account account)~.
+  - balance by account name, between dates: ~Money getBalance(String accountName, String startDate, String endDate)~.
+  - balance by account, between dates: ~Money getBalance(Account account, String startDate, String endDate)~.
+For example:
+#+begin_src java
+  System.out.println("Balance for Assets: " + journal.getBalance("Assets"));
+  var start = "2023/03/05";
+  var end = "2023/03/07";
+  System.out.println("Balance for Cash between " + start + " and " + end + ": " +
+		     journal.getBalance("Cash", start, end));
+#+end_src
+Output:
+#+begin_src shell
+  Balance for Assets: EUR 942.05
+  Balance for Cash between 2023/03/05 and 2023/03/07: EUR 452.05
+#+end_src
+*** Balance report
+Given a =journal= object, we can get the balance report of an =account= using the ~getBalanceReport(...)~ method, which supports the following options:
+  - balance by account name: ~String getBalanceReport(String accountName)~.
+  - balance by account: ~String getBalanceReport(Account account)~.
+  - balance by account name, between dates: ~String getBalanceReport(String accountName, String startDate, String endDate)~.
+  - balance by account, between dates: ~String getBalanceReport(Account account, String startDate, String endDate)~.
+For example, using:
+#+begin_src java
+  System.out.println("\n--- Balance Report for Assets ---");
+  System.out.println(journal.getBalanceReport("Assets"));
+
+  var start = "2023/03/05";
+  var end = "2023/03/07";
+  System.out.println("\n--- Balance Report for Cash between " + start + " and " + end + " ---");
+  System.out.println(journal.getBalanceReport("Cash", start, end));
+#+end_src
+We get this output:
+#+begin_src shell
+  --- Balance Report for Assets ---
+    EUR 500.00  Assets:Cash
+    EUR 500.00  Assets:Debit Card
+    EUR -12.00  Assets:Cash
+    EUR -10.00  Assets:Debit Card
+    EUR -35.95  Assets:Cash
+  -----------------------------------------------------
+    EUR 942.05
+
+
+  --- Balance Report for Cash between 2023/03/05 and 2023/03/07 ---
+    EUR 500.00  Assets:Cash
+    EUR -12.00  Assets:Cash
+    EUR -35.95  Assets:Cash
+  -----------------------------------------------------
+    EUR 452.05
+#+end_src
+*** Transaction reports
+Given a =journal= object, we can use the ~getTransactionReport(...)~ method to get some transaction reports, which supports the following options:
+  - transaction report by account: ~String getTransactionReport(Account account)~.
+  - transaction report by list of accounts: ~String getTransactionReport(List<Account> accounts)~.
+  - transaction report by payee: ~String getTransactionReport(Payee payee)~.
+  - transaction report between dates: ~String getTransactionReport(String startDate, String endDate)~.
+For example:
+#+begin_src java
+  System.out.println("--- Transaction report for account Assets:Cash ---");
+  System.out.println(journal.getTransactionReport(new Account("Assets:Cash")));
+
+  System.out.println("--- Transaction report for accounts Assets:Debit Card and Equity:Opening Balances ---");
+  System.out.println(journal.getTransactionReport(List.of(new Account("Assets:Debit Card"), new Account("Equity:Opening Balances"))));
+
+  System.out.println("--- Transaction report for payee Moe's restaurant ---");
+  System.out.println(journal.getTransactionReport(new Payee("Moe's restaurant")));
+
+  System.out.println("--- Transaction report for all transactions between 2023/03/01 and 2023/03/06 ---");
+  System.out.println(journal.getTransactionReport("2023/03/01", "2023/03/06"));
+
+  System.out.println("--- Transaction report for all transactions between 2023/03/01 and 2023/03/31 ---");
+  System.out.println(journal.getTransactionReport("2023/03/01", "2023/03/31"));
+#+end_src
+Output:
+#+begin_src shell
+  --- Transaction report for account Assets:Cash ---
+  2023/03/07 Moe's restaurant
+      Expenses:Restaurant:Food                            EUR 20.00             EUR 20.00
+      Expenses:Restaurant:Tips                            EUR 2.00              EUR 22.00
+      Assets:Cash                                         EUR -12.00            EUR 10.00
+      Assets:Debit Card                                   EUR -10.00            EUR 0.00
+  2023/03/06 Opening Balance
+      Assets:Cash                                         EUR 500.00            EUR 500.00
+      Assets:Debit Card                                   EUR 500.00            EUR 1000.00
+      Equity:Opening Balances                             EUR -1000.00          EUR 0.00
+  2023/03/07 Mike's convenience store
+      Expenses:Groceries                                  EUR 35.95             EUR 35.95
+      Assets:Cash                                         EUR -35.95            EUR 0.00
+
+  --- Transaction report for accounts Assets:Debit Card and Equity:Opening Balances ---
+  2023/03/07 Moe's restaurant
+      Expenses:Restaurant:Food                            EUR 20.00             EUR 20.00
+      Expenses:Restaurant:Tips                            EUR 2.00              EUR 22.00
+      Assets:Cash                                         EUR -12.00            EUR 10.00
+      Assets:Debit Card                                   EUR -10.00            EUR 0.00
+  2023/03/06 Opening Balance
+      Assets:Cash                                         EUR 500.00            EUR 500.00
+      Assets:Debit Card                                   EUR 500.00            EUR 1000.00
+      Equity:Opening Balances                             EUR -1000.00          EUR 0.00
+
+  --- Transaction report for payee Moe's restaurant ---
+  2023/03/07 Moe's restaurant
+      Expenses:Restaurant:Food                            EUR 20.00             EUR 20.00
+      Expenses:Restaurant:Tips                            EUR 2.00              EUR 22.00
+      Assets:Cash                                         EUR -12.00            EUR 10.00
+      Assets:Debit Card                                   EUR -10.00            EUR 0.00
+
+  --- Transaction report for all transactions between 2023/03/01 and 2023/03/06 ---
+  2023/03/06 Opening Balance
+      Assets:Cash                                         EUR 500.00            EUR 500.00
+      Assets:Debit Card                                   EUR 500.00            EUR 1000.00
+      Equity:Opening Balances                             EUR -1000.00          EUR 0.00
+
+  --- Transaction report for all transactions between 2023/03/01 and 2023/03/31 ---
+  2023/03/07 Moe's restaurant
+      Expenses:Restaurant:Food                            EUR 20.00             EUR 20.00
+      Expenses:Restaurant:Tips                            EUR 2.00              EUR 22.00
+      Assets:Cash                                         EUR -12.00            EUR 10.00
+      Assets:Debit Card                                   EUR -10.00            EUR 0.00
+  2023/03/06 Opening Balance
+      Assets:Cash                                         EUR 500.00            EUR 500.00
+      Assets:Debit Card                                   EUR 500.00            EUR 1000.00
+      Equity:Opening Balances                             EUR -1000.00          EUR 0.00
+  2023/03/07 Mike's convenience store
+      Expenses:Groceries                                  EUR 35.95             EUR 35.95
+      Assets:Cash                                         EUR -35.95            EUR 0.00
+#+end_src
