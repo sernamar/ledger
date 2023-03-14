@@ -8,10 +8,9 @@ import org.junitpioneer.jupiter.DefaultLocale;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Locale;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @DefaultLocale("es-ES")
 class JournalTest {
@@ -199,5 +198,89 @@ class JournalTest {
         // List<Entry> getEntriesBy(Money amount, LocalDate date)
         entries = journal.getEntriesBy(amount, date);
         assertEquals(expected, entries);
+    }
+
+    @Test
+    void getTransactions() {
+
+        // Set<Transaction> getTransactionsByAccount(String accountName)
+        var transactions = journal.getTransactionsByAccount("Equity:Opening Balances");
+        Set<Transaction> expected = new HashSet<>();
+
+        var date1 = LocalDate.parse("2023/03/06", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+        var status1 = TransactionStatus.CLEARED;
+        var payee1 = "Opening Balance";
+        var entries1 = new ArrayList<Entry>();
+        entries1.add(new Entry(new Account("Assets:Cash"), Money.of(currency, 500)));
+        entries1.add(new Entry(new Account("Assets:Debit Card"), Money.of(currency, 500)));
+        entries1.add(new Entry(new Account("Equity:Opening Balances"), Money.of(currency, -1000)));
+        expected.add(new Transaction(date1, status1, payee1, entries1));
+
+        assertEquals(expected, transactions);
+
+        // Set<Transaction> getTransactions(String payee)
+        transactions = journal.getTransactions("Opening Balance");
+        assertEquals(expected, transactions);
+
+        // Set<Transaction> getTransactions(String startDate, String endDate)
+        transactions = journal.getTransactions("2023/03/01", "2023/03/06");
+        assertEquals(expected, transactions);
+
+        // Set<Transaction> getTransactions(List<String> accountsNames)
+        var accountNames = List.of("Equity:Opening Balances", "Assets:Debit Card");
+        transactions = journal.getTransactions(accountNames);
+
+        var date2 = LocalDate.parse("2023/03/07", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+        var status2 = TransactionStatus.PENDING;
+        var payee2 = "Moe's restaurant";
+        var entries2 = new ArrayList<Entry>();
+        entries2.add(new Entry(new Account("Expenses:Restaurant:Food"), Money.of(currency, 20)));
+        entries2.add(new Entry(new Account("Expenses:Restaurant:Tips"), Money.of(currency, 2)));
+        entries2.add(new Entry(new Account("Assets:Cash"), Money.of(currency, -12)));
+        entries2.add(new Entry(new Account("Assets:Debit Card"), Money.of(currency, -10)));
+        expected.add(new Transaction(date2, status2, payee2, entries2));
+
+        assertEquals(expected, transactions);
+
+        // Set<Transaction> getTransactions(String startDate, String endDate)
+        transactions = journal.getTransactions("2023/03/01", "2023/03/31");
+
+        var date3 = LocalDate.parse("2023/03/07", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+        var payee3 = "Mike's convenience store";
+        var entries3 = new ArrayList<Entry>();
+        entries3.add(new Entry(new Account("Expenses:Groceries"), Money.of(currency, 35.95)));
+        entries3.add(new Entry(new Account("Assets:Cash"), Money.of(currency, -35.95)));
+        expected.add(new Transaction(date3, null, payee3, entries3));
+        assertEquals(expected, transactions);
+    }
+
+    @Test
+    void accountInTransaction() {
+        var date = LocalDate.parse("2023/03/06", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+        var status = TransactionStatus.CLEARED;
+        var payee = "Opening Balance";
+        var entries = new ArrayList<Entry>();
+        entries.add(new Entry(new Account("Assets:Cash"), Money.of(currency, 500)));
+        entries.add(new Entry(new Account("Assets:Debit Card"), Money.of(currency, 500)));
+        entries.add(new Entry(new Account("Equity:Opening Balances"), Money.of(currency, -1000)));
+        var transaction = new Transaction(date, status, payee, entries);
+
+        assertTrue(journal.accountNameInTransaction("Assets:Cash", transaction));
+        assertFalse(journal.accountNameInTransaction("Foo:Bar:Baz", transaction));
+    }
+
+    @Test
+    void payeeInTransaction() {
+        var date = LocalDate.parse("2023/03/06", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+        var status = TransactionStatus.CLEARED;
+        var payee = "Opening Balance";
+        var entries = new ArrayList<Entry>();
+        entries.add(new Entry(new Account("Assets:Cash"), Money.of(currency, 500)));
+        entries.add(new Entry(new Account("Assets:Debit Card"), Money.of(currency, 500)));
+        entries.add(new Entry(new Account("Equity:Opening Balances"), Money.of(currency, -1000)));
+        var transaction = new Transaction(date, status, payee, entries);
+
+        assertTrue(journal.payeeInTransaction("Opening Balance", transaction));
+        assertFalse(journal.payeeInTransaction("Foo Bar Baz", transaction));
     }
 }

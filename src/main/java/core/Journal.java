@@ -5,10 +5,8 @@ import org.joda.money.Money;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Represents a journal (a group of transactions).
@@ -259,5 +257,45 @@ public class Journal {
                 .flatMap(Collection::stream)
                 .filter(entry -> entry.account().getName().contains(accountName) && entry.amount().equals(amount))
                 .toList();
+    }
+
+    /* ============================= */
+    /* Transaction filtering methods */
+    /* ============================= */
+
+    protected Set<Transaction> getTransactionsByAccount(String accountName) {
+        return getTransactions().stream()
+                .filter(transaction -> accountNameInTransaction(accountName, transaction))
+                .collect(Collectors.toCollection(HashSet::new));
+    }
+
+    public Set<Transaction> getTransactions(List<String> accountsNames) {
+        return accountsNames.stream()
+                .flatMap(accountName -> getTransactionsByAccount(accountName).stream())
+                .collect(Collectors.toCollection(HashSet::new));
+    }
+
+    public Set<Transaction> getTransactions(String payee) {
+        return getTransactions().stream()
+                .filter(transaction -> payeeInTransaction(payee, transaction))
+                .collect(Collectors.toCollection(HashSet::new));
+    }
+
+    public Set<Transaction> getTransactions(String startDate, String endDate) {
+        var start = LocalDate.parse(startDate, DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+        var end = LocalDate.parse(endDate, DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+
+        return getTransactions().stream()
+                .filter(transaction -> !(transaction.date().isBefore(start) || transaction.date().isAfter(end)))
+                .collect(Collectors.toCollection(HashSet::new));
+    }
+
+    protected boolean accountNameInTransaction(String accountName, Transaction transaction) {
+        return transaction.entries().stream()
+                .anyMatch(entry -> entry.account().getName().contains(accountName));
+    }
+
+    protected boolean payeeInTransaction(String payee, Transaction transaction) {
+        return transaction.payee().equals(payee);
     }
 }
