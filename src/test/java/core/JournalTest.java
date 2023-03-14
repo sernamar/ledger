@@ -80,14 +80,14 @@ class JournalTest {
     }
 
     @Test
-    void getEntriesByPayee() {
-        var payee = "Moe's restaurant";
+    void getEntriesBy1() {
+        var payee = new Payee("Moe's restaurant");
         var date = LocalDate.parse("2023/03/07", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
-        var accountName = "Assets:Cash";
+        var account = new Account("Assets:Cash");
         var amount = Money.of(CurrencyUnit.of(Locale.getDefault()), -12);
 
-        // List<Entry> getEntriesByPayee(String payee)
-        var entries = journal.getEntriesByPayee(payee);
+        // List<Entry> getEntriesBy(Payee payee)
+        var entries = journal.getEntriesBy(payee);
         var expected = new ArrayList<>();
         expected.add(new Entry(new Account("Expenses:Restaurant:Food"), Money.of(currency, 20)));
         expected.add(new Entry(new Account("Expenses:Restaurant:Tips"), Money.of(currency, 2)));
@@ -95,86 +95,86 @@ class JournalTest {
         expected.add(new Entry(new Account("Assets:Debit Card"), Money.of(currency, -10)));
         assertEquals(expected, entries);
 
-        // List<Entry> getEntriesByPayee(String payee, LocalDate date)
-        entries = journal.getEntriesByPayee(payee, date);
+        // List<Entry> getEntriesBy(Payee payee, LocalDate date)
+        entries = journal.getEntriesBy(payee, date);
         assertEquals(expected, entries);
 
-        // List<Entry> getEntriesByPayee(String payee, String accountName)
-        entries = journal.getEntriesByPayee(payee, accountName);
+        // List<Entry> getEntriesBy(Payee payee, Account account)
+        entries = journal.getEntriesBy(payee, account);
         expected = new ArrayList<>();
         expected.add(new Entry(new Account("Assets:Cash"), Money.of(currency, -12)));
         assertEquals(expected, entries);
 
-        // List<Entry> getEntriesByPayee(String payee, Money amount)
-        entries = journal.getEntriesByPayee(payee, amount);
+        // List<Entry> getEntriesBy(Payee payee, Money amount)
+        entries = journal.getEntriesBy(payee, amount);
         expected = new ArrayList<>();
         expected.add(new Entry(new Account("Assets:Cash"), Money.of(currency, -12)));
         assertEquals(expected, entries);
 
-        // List<Entry> getEntriesByPayee(String payee, String accountName, Money amount)
-        entries = journal.getEntriesByPayee(payee, accountName, amount);
+        // List<Entry> getEntriesBy(Payee payee, Account account, Money amount)
+        entries = journal.getEntriesBy(payee, account, amount);
         assertEquals(expected, entries);
 
-        // List<Entry> getEntriesByPayee(String payee, String accountName, LocalDate date)
-        entries = journal.getEntriesByPayee(payee, accountName, date);
+        // List<Entry> getEntriesBy(Payee payee, Account account, LocalDate date)
+        entries = journal.getEntriesBy(payee, account, date);
         assertEquals(expected, entries);
 
-        // List<Entry> getEntriesByPayee(String payee, LocalDate date, Money amount)
-        entries = journal.getEntriesByPayee(payee, date, amount);
+        // List<Entry> getEntriesBy(Payee payee, LocalDate date, Money amount)
+        entries = journal.getEntriesBy(payee, date, amount);
         assertEquals(expected, entries);
     }
 
     @Test
-    void getEntriesByAccount() {
-        var payee = "Moe's restaurant";
+    void getEntriesBy2() {
+        var payee = new Payee("Moe's restaurant");
         var date = LocalDate.parse("2023/03/07", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
-        var accountName = "Assets:Cash";
+        var account = new Account("Assets:Cash");
         var amount = Money.of(CurrencyUnit.of(Locale.getDefault()), -12);
 
-        // List<Entry> getEntriesByAccount(String accountName)
-        var entries = journal.getEntriesByAccount(accountName);
+        // List<Entry> getEntriesBy(Account account)
+        var entries = journal.getEntriesBy(account);
         var expected = new ArrayList<>();
         expected.add(new Entry(new Account("Assets:Cash"), Money.of(currency, 500)));
         expected.add(new Entry(new Account("Assets:Cash"), Money.of(currency, -12)));
         expected.add(new Entry(new Account("Assets:Cash"), Money.of(currency, -35.95)));
         assertEquals(expected, entries);
 
-        // List<Entry> getEntriesByAccount(String accountName, Money amount)
-        entries = journal.getEntriesByAccount(accountName, amount);
+        // List<Entry> getEntriesBy(Account account, Money amount)
+        entries = journal.getEntriesBy(account, amount);
         expected = new ArrayList<>();
         expected.add(new Entry(new Account("Assets:Cash"), Money.of(currency, -12)));
         assertEquals(expected, entries);
 
-        // List<Entry> getEntriesByAccount(String accountName, String payee)
-        entries = journal.getEntriesByAccount(accountName, payee);
+        // List<Entry> getEntriesBy(Account account, Payee payee)
+        entries = journal.getEntriesBy(account, payee);
         assertEquals(expected, entries);
 
-        // List<Entry> getEntriesByAccount(String accountName, LocalDate date)
-        entries = journal.getEntriesByAccount(accountName, date);
+        // List<Entry> getEntriesBy(Account account, LocalDate date)
+        entries = journal.getEntriesBy(account, date);
         expected = new ArrayList<>();
         expected.add(new Entry(new Account("Assets:Cash"), Money.of(currency, -12)));
         expected.add(new Entry(new Account("Assets:Cash"), Money.of(currency, -35.95)));
         assertEquals(expected, entries);
 
-        // List<Entry> getEntriesByAccount(String accountName, String payee, Money amount)
-        entries = journal.getEntriesByAccount(accountName, payee, amount);
+        // List<Entry> getEntriesBy(Account account, Payee payee, Money amount)
+        entries = journal.getEntriesBy(account, payee, amount);
         expected = new ArrayList<>();
         expected.add(new Entry(new Account("Assets:Cash"), Money.of(currency, -12)));
         assertEquals(expected, entries);
 
-        // List<Entry> getEntriesByAccount(String accountName, String payee, LocalDate date)
-        entries = journal.getEntriesByAccount(accountName, payee, date);
+        // List<Entry> getEntriesBy(Account account, Payee payee, LocalDate date)
+        entries = journal.getEntriesBy(account, payee, date);
         expected = new ArrayList<>();
         expected.add(new Entry(new Account("Assets:Cash"), Money.of(currency, -12)));
         assertEquals(expected, entries);
 
-        // List<Entry> getEntriesByAccount(String accountName, LocalDate date, Money amount)
-        entries = journal.getEntriesByAccount(accountName, date, amount);
+        // List<Entry> getEntriesBy(Account account, LocalDate date, Money amount)
+        entries = journal.getEntriesBy(account, date, amount);
         assertEquals(expected, entries);
     }
 
     @Test
-    void getEntriesBy() {
+    void getEntriesBy3() {
         var date = LocalDate.parse("2023/03/07", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
         var amount = Money.of(CurrencyUnit.of(Locale.getDefault()), -12);
 
@@ -203,8 +203,8 @@ class JournalTest {
     @Test
     void getTransactions() {
 
-        // Set<Transaction> getTransactionsByAccount(String accountName)
-        var transactions = journal.getTransactionsByAccount("Equity:Opening Balances");
+        // Set<Transaction> getTransactionsByAccount(Account account)
+        var transactions = journal.getTransactionsBy(new Account("Equity:Opening Balances"));
         Set<Transaction> expected = new HashSet<>();
 
         var date1 = LocalDate.parse("2023/03/06", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
@@ -218,8 +218,8 @@ class JournalTest {
 
         assertEquals(expected, transactions);
 
-        // Set<Transaction> getTransactions(String payee)
-        transactions = journal.getTransactions("Opening Balance");
+        // Set<Transaction> getTransactions(Payee payee)
+        transactions = journal.getTransactions(new Payee("Opening Balance"));
         assertEquals(expected, transactions);
 
         // Set<Transaction> getTransactions(String startDate, String endDate)
@@ -227,8 +227,8 @@ class JournalTest {
         assertEquals(expected, transactions);
 
         // Set<Transaction> getTransactions(List<String> accountsNames)
-        var accountNames = List.of("Equity:Opening Balances", "Assets:Debit Card");
-        transactions = journal.getTransactions(accountNames);
+        var accounts = List.of(new Account("Equity:Opening Balances"), new Account("Assets:Debit Card"));
+        transactions = journal.getTransactions(accounts);
 
         var date2 = LocalDate.parse("2023/03/07", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
         var status2 = TransactionStatus.PENDING;
@@ -265,8 +265,8 @@ class JournalTest {
         entries.add(new Entry(new Account("Equity:Opening Balances"), Money.of(currency, -1000)));
         var transaction = new Transaction(date, status, payee, entries);
 
-        assertTrue(journal.accountNameInTransaction("Assets:Cash", transaction));
-        assertFalse(journal.accountNameInTransaction("Foo:Bar:Baz", transaction));
+        assertTrue(journal.accountInTransaction(new Account("Assets:Cash"), transaction));
+        assertFalse(journal.accountInTransaction(new Account("Foo:Bar:Baz"), transaction));
     }
 
     @Test
@@ -280,7 +280,7 @@ class JournalTest {
         entries.add(new Entry(new Account("Equity:Opening Balances"), Money.of(currency, -1000)));
         var transaction = new Transaction(date, status, payee, entries);
 
-        assertTrue(journal.payeeInTransaction("Opening Balance", transaction));
-        assertFalse(journal.payeeInTransaction("Foo Bar Baz", transaction));
+        assertTrue(journal.payeeInTransaction(new Payee("Opening Balance"), transaction));
+        assertFalse(journal.payeeInTransaction(new Payee("Foo Bar Baz"), transaction));
     }
 }
