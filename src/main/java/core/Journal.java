@@ -306,6 +306,51 @@ public class Journal {
                 .collect(Collectors.toCollection(HashSet::new));
     }
 
+    public String getTransactionReport(Account account) {
+        return getTransactionReport(getTransactions(account));
+    }
+
+    public String getTransactionReport(List<Account> accounts) {
+        return getTransactionReport(getTransactions(accounts));
+    }
+
+    public String getTransactionReport(Payee payee) {
+        return getTransactionReport(getTransactions(payee));
+    }
+
+    public String getTransactionReport(String startDate, String endDate) {
+        return getTransactionReport(getTransactions(startDate, endDate));
+    }
+
+    private String getTransactionReport(Set<Transaction> transactions) {
+        var report = new StringBuilder();
+        for (var transaction : transactions) {
+            report.append(getTransactionHeader(transaction));
+            report.append(getTransactionEntries(transaction));
+        }
+        return report.toString();
+    }
+
+    private String getTransactionHeader(Transaction transaction) {
+        return transaction.date().format(DateTimeFormatter.ofPattern("yyyy/MM/dd")) +
+                " " + transaction.payee().name() + "\n";
+    }
+
+    private String getTransactionEntries(Transaction transaction) {
+        var entryBuilder = new StringBuilder();
+        Money balance = null;
+        for (var entry : transaction.entries()) {
+            var name = entry.account().getName();
+            var amount = entry.amount();
+            balance = (balance != null) ? balance.plus(amount) : amount;
+            entryBuilder.append(String.format("    %-50s", name))
+                    .append(String.format("  %-20s", amount))
+                    .append(String.format("  %s", balance))
+                    .append("\n");
+        }
+        return entryBuilder.toString();
+    }
+
     protected boolean accountInTransaction(Account account, Transaction transaction) {
         return transaction.entries().stream()
                 .anyMatch(entry -> entry.account().equals(account));
