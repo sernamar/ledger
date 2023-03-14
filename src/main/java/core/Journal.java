@@ -115,6 +115,91 @@ public class Journal {
         return getBalanceReport(account.getName(), startDate, endDate);
     }
 
+    /* ============================= */
+    /* Transaction filtering methods */
+    /* ============================= */
+
+    protected Set<Transaction> getTransactions(Account account) {
+        return getTransactions().stream()
+                .filter(transaction -> accountInTransaction(account, transaction))
+                .collect(Collectors.toCollection(HashSet::new));
+    }
+
+    public Set<Transaction> getTransactions(List<Account> accounts) {
+        return accounts.stream()
+                .flatMap(account -> getTransactions(account).stream())
+                .collect(Collectors.toCollection(HashSet::new));
+    }
+
+    public Set<Transaction> getTransactions(Payee payee) {
+        return getTransactions().stream()
+                .filter(transaction -> payeeInTransaction(payee, transaction))
+                .collect(Collectors.toCollection(HashSet::new));
+    }
+
+    public Set<Transaction> getTransactions(String startDate, String endDate) {
+        var start = LocalDate.parse(startDate, DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+        var end = LocalDate.parse(endDate, DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+
+        return getTransactions().stream()
+                .filter(transaction -> !(transaction.date().isBefore(start) || transaction.date().isAfter(end)))
+                .collect(Collectors.toCollection(HashSet::new));
+    }
+
+    public String getTransactionReport(Account account) {
+        return getReport(getTransactions(account));
+    }
+
+    public String getTransactionReport(List<Account> accounts) {
+        return getReport(getTransactions(accounts));
+    }
+
+    public String getTransactionReport(Payee payee) {
+        return getReport(getTransactions(payee));
+    }
+
+    public String getTransactionReport(String startDate, String endDate) {
+        return getReport(getTransactions(startDate, endDate));
+    }
+
+    private String getReport(Set<Transaction> transactions) {
+        var report = new StringBuilder();
+        for (var transaction : transactions) {
+            report.append(getHeader(transaction));
+            report.append(getEntries(transaction));
+        }
+        return report.toString();
+    }
+
+    private String getHeader(Transaction transaction) {
+        return transaction.date().format(DateTimeFormatter.ofPattern("yyyy/MM/dd")) +
+                " " + transaction.payee().name() + "\n";
+    }
+
+    private String getEntries(Transaction transaction) {
+        var entryBuilder = new StringBuilder();
+        Money balance = null;
+        for (var entry : transaction.entries()) {
+            var name = entry.account().getName();
+            var amount = entry.amount();
+            balance = (balance != null) ? balance.plus(amount) : amount;
+            entryBuilder.append(String.format("    %-50s", name))
+                    .append(String.format("  %-20s", amount))
+                    .append(String.format("  %s", balance))
+                    .append("\n");
+        }
+        return entryBuilder.toString();
+    }
+
+    protected boolean accountInTransaction(Account account, Transaction transaction) {
+        return transaction.entries().stream()
+                .anyMatch(entry -> entry.account().equals(account));
+    }
+
+    protected boolean payeeInTransaction(Payee payee, Transaction transaction) {
+        return transaction.payee().equals(payee);
+    }
+
     /* ======================= */
     /* Entry filtering methods */
     /* ======================= */
@@ -273,90 +358,5 @@ public class Journal {
                 .flatMap(Collection::stream)
                 .filter(entry -> entry.account().equals(account) && entry.amount().equals(amount))
                 .toList();
-    }
-
-    /* ============================= */
-    /* Transaction filtering methods */
-    /* ============================= */
-
-    protected Set<Transaction> getTransactions(Account account) {
-        return getTransactions().stream()
-                .filter(transaction -> accountInTransaction(account, transaction))
-                .collect(Collectors.toCollection(HashSet::new));
-    }
-
-    public Set<Transaction> getTransactions(List<Account> accounts) {
-        return accounts.stream()
-                .flatMap(account -> getTransactions(account).stream())
-                .collect(Collectors.toCollection(HashSet::new));
-    }
-
-    public Set<Transaction> getTransactions(Payee payee) {
-        return getTransactions().stream()
-                .filter(transaction -> payeeInTransaction(payee, transaction))
-                .collect(Collectors.toCollection(HashSet::new));
-    }
-
-    public Set<Transaction> getTransactions(String startDate, String endDate) {
-        var start = LocalDate.parse(startDate, DateTimeFormatter.ofPattern("yyyy/MM/dd"));
-        var end = LocalDate.parse(endDate, DateTimeFormatter.ofPattern("yyyy/MM/dd"));
-
-        return getTransactions().stream()
-                .filter(transaction -> !(transaction.date().isBefore(start) || transaction.date().isAfter(end)))
-                .collect(Collectors.toCollection(HashSet::new));
-    }
-
-    public String getTransactionReport(Account account) {
-        return getTransactionReport(getTransactions(account));
-    }
-
-    public String getTransactionReport(List<Account> accounts) {
-        return getTransactionReport(getTransactions(accounts));
-    }
-
-    public String getTransactionReport(Payee payee) {
-        return getTransactionReport(getTransactions(payee));
-    }
-
-    public String getTransactionReport(String startDate, String endDate) {
-        return getTransactionReport(getTransactions(startDate, endDate));
-    }
-
-    private String getTransactionReport(Set<Transaction> transactions) {
-        var report = new StringBuilder();
-        for (var transaction : transactions) {
-            report.append(getTransactionHeader(transaction));
-            report.append(getTransactionEntries(transaction));
-        }
-        return report.toString();
-    }
-
-    private String getTransactionHeader(Transaction transaction) {
-        return transaction.date().format(DateTimeFormatter.ofPattern("yyyy/MM/dd")) +
-                " " + transaction.payee().name() + "\n";
-    }
-
-    private String getTransactionEntries(Transaction transaction) {
-        var entryBuilder = new StringBuilder();
-        Money balance = null;
-        for (var entry : transaction.entries()) {
-            var name = entry.account().getName();
-            var amount = entry.amount();
-            balance = (balance != null) ? balance.plus(amount) : amount;
-            entryBuilder.append(String.format("    %-50s", name))
-                    .append(String.format("  %-20s", amount))
-                    .append(String.format("  %s", balance))
-                    .append("\n");
-        }
-        return entryBuilder.toString();
-    }
-
-    protected boolean accountInTransaction(Account account, Transaction transaction) {
-        return transaction.entries().stream()
-                .anyMatch(entry -> entry.account().equals(account));
-    }
-
-    protected boolean payeeInTransaction(Payee payee, Transaction transaction) {
-        return transaction.payee().equals(payee);
     }
 }
