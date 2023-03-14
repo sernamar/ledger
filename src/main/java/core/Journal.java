@@ -279,7 +279,7 @@ public class Journal {
     /* Transaction filtering methods */
     /* ============================= */
 
-    protected Set<Transaction> getTransactionsBy(Account account) {
+    protected Set<Transaction> getTransactions(Account account) {
         return getTransactions().stream()
                 .filter(transaction -> accountInTransaction(account, transaction))
                 .collect(Collectors.toCollection(HashSet::new));
@@ -287,7 +287,7 @@ public class Journal {
 
     public Set<Transaction> getTransactions(List<Account> accounts) {
         return accounts.stream()
-                .flatMap(account -> getTransactionsBy(account).stream())
+                .flatMap(account -> getTransactions(account).stream())
                 .collect(Collectors.toCollection(HashSet::new));
     }
 

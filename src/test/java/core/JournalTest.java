@@ -204,7 +204,7 @@ class JournalTest {
     void getTransactions() {
 
         // Set<Transaction> getTransactionsByAccount(Account account)
-        var transactions = journal.getTransactionsBy(new Account("Equity:Opening Balances"));
+        var transactions = journal.getTransactions(new Account("Equity:Opening Balances"));
         Set<Transaction> expected = new HashSet<>();
 
         var date1 = LocalDate.parse("2023/03/06", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
