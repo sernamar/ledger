@@ -18,7 +18,7 @@ Once we have read a journal file into a =ledger= object, we can print the journa
   writer.writeJournal(journal);
 #+end_src
 Output:
-#+begin_src shell
+#+begin_example
   2023/03/06 * Opening Balance
       Assets:Cash                                       EUR 500.00
       Assets:Debit Card                                 EUR 500.00
@@ -33,7 +33,7 @@ Output:
   2023/03/07 Mike's convenience store
       Expenses:Groceries                                EUR 35.95
       Assets:Cash                                       EUR -35.95
-#+end_src
+#+end_example
 *** Write a journal to a file
 As before, once we have read a journal file into a =ledger= object, we can print the journal to a file:
 #+begin_src java
@@ -49,7 +49,7 @@ As before, once we have read a journal file into a =ledger= object, we can print
   }
 #+end_src
 Resulting in a file with the following content:
-#+begin_src shell
+#+begin_example
   2023/03/06 * Opening Balance
       Assets:Cash                                       EUR 500.00
       Assets:Debit Card                                 EUR 500.00
@@ -64,8 +64,7 @@ Resulting in a file with the following content:
   2023/03/07 Mike's convenience store
       Expenses:Groceries                                EUR 35.95
       Assets:Cash                                       EUR -35.95
-#+end_src
-
+#+end_example
 *** Balance
 Given a =journal= object, we can get the balance of an =account= using the ~getBalance(...)~ method, which supports the following options:
   - balance by account name: ~Money getBalance(String accountName)~.
@@ -81,10 +80,10 @@ For example:
 		     journal.getBalance("Cash", start, end));
 #+end_src
 Output:
-#+begin_src shell
+#+begin_example
   Balance for Assets: EUR 942.05
   Balance for Cash between 2023/03/05 and 2023/03/07: EUR 452.05
-#+end_src
+#+end_example
 *** Balance report
 Given a =journal= object, we can get the balance report of an =account= using the ~getBalanceReport(...)~ method, which supports the following options:
   - balance by account name: ~String getBalanceReport(String accountName)~.
@@ -102,7 +101,7 @@ For example, using:
   System.out.println(journal.getBalanceReport("Cash", start, end));
 #+end_src
 We get this output:
-#+begin_src shell
+#+begin_example
   --- Balance Report for Assets ---
     EUR 500.00  Assets:Cash
     EUR 500.00  Assets:Debit Card
@@ -119,7 +118,7 @@ We get this output:
     EUR -35.95  Assets:Cash
   -----------------------------------------------------
     EUR 452.05
-#+end_src
+#+end_example
 *** Transaction reports
 Given a =journal= object, we can use the ~getTransactionReport(...)~ method to get some transaction reports, which supports the following options:
   - transaction report by account: ~String getTransactionReport(Account account)~.
@@ -144,7 +143,7 @@ For example:
   System.out.println(journal.getTransactionReport("2023/03/01", "2023/03/31"));
 #+end_src
 Output:
-#+begin_src shell
+#+begin_example
   --- Transaction report for account Assets:Cash ---
   2023/03/07 Moe's restaurant
       Expenses:Restaurant:Food                            EUR 20.00             EUR 20.00
@@ -196,4 +195,4 @@ Output:
   2023/03/07 Mike's convenience store
       Expenses:Groceries                                  EUR 35.95             EUR 35.95
       Assets:Cash                                         EUR -35.95            EUR 0.00
-#+end_src
+#+end_example
