@@ -2,25 +2,27 @@
 Double-entry accounting system.
 ** How to use it
 *** Read a journal from a file into a ledger object
-To read a journal form a file, we first need to create a =LedgerReader= object. If we create a use the =LedgerReader= constructor without arguments, it would use the default =locale= from the operating system:
+To read a journal form a file, we first need to create a =LedgerReader= object. If we use the =LedgerReader= constructor without arguments, it would use the default =locale= from the operating system:
 #+begin_src java
+  var reader = new LedgerReader();
+
   var filename = "src/main/resources/example.ledger";
   var file = Path.of(filename);
-  
-  var reader = new LedgerReader();
+
   var ledger = reader.readJournal(file);
 #+end_src
-But we can also use a specific =locale= whe creating a =LedgerReader= object. For example, to read a journal file containing amounts in yuans, and using points a decimal separators, we could use:
+But we can also use a specific =locale= whe creating a =LedgerReader= object. For example, to read a journal file using the default China =locale= (amounts in yuans, and points as decimal separators), we could use:
 #+begin_src java
-  var locale = Locale.CHINA;
+  var reader = new LedgerReader(Locale.CHINA);
+
   var filename = "src/main/resources/yuan.ledger";
   var file = Path.of(filename);
 
-  var reader = new LedgerReader(locale);
   var ledger = reader.readJournal(file);
 #+end_src
 *** Print a journal to the standard output
-Once we have read a journal file into a =ledger= object, we can print the journal to the standard output using a =LedgerWriter= object. That =LedgerWriter= object would use the same =locale= as the one we use to read the =Ledger= object.
+Once we have read a journal file into a =ledger= object, we can print the journal to the standard output using a =LedgerWriter= object. That =LedgerWriter= object will use the same =locale= as the one we used to read the =Ledger= object.
+
 For the first example, where we used the default =locale= from the operating system (in my case, =es-ES=), when we run:
 #+begin_src java
   var journal = ledger.getJournal();
@@ -64,11 +66,12 @@ For the second example, where we used the =Locale.CHINA= locale, we'll get:
 *** Write a journal to a file
 We can also write a journal to a file using the following code:
 #+begin_src java
+  var journal = ledger.getJournal();
+  var writer = new LedgerWriter();
+
   var outputFilename = "src/main/resources/output.ledger";
   var outputFile = Path.of(outputFilename);
 
-  var journal = ledger.getJournal();
-  var writer = new LedgerWriter();
   try {
       writer.writeJournal(journal, outputFile);
   } catch (IOException e) {
@@ -77,10 +80,10 @@ We can also write a journal to a file using the following code:
 #+end_src
 And we'll get the same output as before but written to a file instead of printed to the standard output.
 *** Balance
-Given a =journal= object, we can get the balance of an =account= using the ~getBalanceAsString(...)~ method, which supports the following options:
-  - balance by account name: ~String getBalanceAsString(String accountName)~.
-  - balance by account: ~String getBalanceAsString(Account account)~.
-  - balance by account name, between dates: ~String getBalanceAsString(String accountName, String startDate, String endDate)~.
+Given a =Journal= object, we can get the balance of an =Account= using the ~getBalanceAsString(...)~ method, which supports the following options:
+  - string balance representation by account name: ~String getBalanceAsString(String accountName)~.
+  - string balance representation by account: ~String getBalanceAsString(Account account)~.
+  - string balance representation by account name, between dates: ~String getBalanceAsString(String accountName, String startDate, String endDate)~.
   - balance by account, between dates: ~String getBalanceAsString(Account account, String startDate, String endDate)~.
 For example:
 #+begin_src java
@@ -95,13 +98,13 @@ Output:
   Balance for Assets: 942,05 €
   Balance for Cash between 2023/03/05 and 2023/03/07: 452,05 €
 #+end_example
-There's also a method to get the balance of an =account= as a =Money= object: ~getBalance(...)~. That method supports the same options as the ~getBalanceAsString(...)~:
+There's also a method to get the balance of an =Account= as a =Money= object: ~getBalance(...)~. That method supports the same options as before:
   - balance by account name: ~Money getBalance(String accountName)~.
   - balance by account: ~Money getBalance(Account account)~.
   - balance by account name, between dates: ~Money getBalance(String accountName, String startDate, String endDate)~.
   - balance by account, between dates: ~Money getBalance(Account account, String startDate, String endDate)~.
 *** Balance report
-Given a =journal= object, we can get the balance report of an =account= using the ~getBalanceReport(...)~ method, which supports the following options:
+Given a =Journal= object, we can get the balance report of an =Account= using the ~getBalanceReport(...)~ method, which supports the following options:
   - balance by account name: ~String getBalanceReport(String accountName)~.
   - balance by account: ~String getBalanceReport(Account account)~.
   - balance by account name, between dates: ~String getBalanceReport(String accountName, String startDate, String endDate)~.
@@ -136,7 +139,7 @@ We get this output:
     452,05 €
 #+end_example
 *** Transaction reports
-Given a =journal= object, we can use the ~getTransactionReport(...)~ method to get some transaction reports, which supports the following options:
+Given a =Journal= object, we can use the ~getTransactionReport(...)~ method to get some transaction reports, which supports the following options:
   - transaction report by account: ~String getTransactionReport(Account account)~.
   - transaction report by list of accounts: ~String getTransactionReport(List<Account> accounts)~.
   - transaction report by payee: ~String getTransactionReport(Payee payee)~.
