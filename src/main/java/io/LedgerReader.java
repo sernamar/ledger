@@ -3,6 +3,8 @@ package io;
 import core.*;
 import org.joda.money.CurrencyUnit;
 import org.joda.money.Money;
+import org.joda.money.format.MoneyAmountStyle;
+import org.joda.money.format.MoneyFormatterBuilder;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -10,6 +12,7 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 /**
@@ -25,8 +28,12 @@ public class LedgerReader implements Reader {
     private final Journal journal;
 
     public LedgerReader() {
+        this(Locale.getDefault());
+    }
+
+    public LedgerReader(Locale locale) {
         this.accounts = new ChartOfAccounts();
-        this.journal  = new Journal();
+        this.journal  = new Journal(locale);
     }
 
     @Override
@@ -83,27 +90,27 @@ public class LedgerReader implements Reader {
     }
 
     protected Money parseAmount(String amountStr) {
-        Pattern currencyAmountPattern = Pattern.compile("(\\w+)\\s([+-]?\\d+\\.?\\d*)");
-        Pattern amountCurrencyPattern = Pattern.compile("([+-]?\\d+\\.?\\d*)\\s(\\w+)");
-        Pattern amountOnlyPattern = Pattern.compile("([+-]?\\d+.?\\d*)");
-        CurrencyUnit currency;
-        double amount;
-        var currencyAmountMatches = getMatches(amountStr, currencyAmountPattern);
-        var amountCurrencyMatches = getMatches(amountStr, amountCurrencyPattern);
-        var amountOnlyMatches = getMatches(amountStr, amountOnlyPattern);
-        if (!currencyAmountMatches.isEmpty()) {
-            currency = CurrencyUnit.of(currencyAmountMatches.get(0));
-            amount   = Double.parseDouble(currencyAmountMatches.get(1));
-            return Money.of(currency, amount);
-        } else if (!amountCurrencyMatches.isEmpty()) {
-            amount = Double.parseDouble(amountCurrencyMatches.get(0));
-            currency = CurrencyUnit.of(amountCurrencyMatches.get(1));
-            return Money.of(currency, amount);
-        } else if (!amountOnlyMatches.isEmpty()) {
-                amount = Double.parseDouble(amountOnlyMatches.get(0));
-                return Money.of(journal.getDefaultCurrency(), amount);
+        Pattern currencyAmountPattern = Pattern.compile("([$£€¥₹]|\\w+)\\s([+-]?\\d+[.,]?\\d*)");
+        var matches = getMatches(amountStr, currencyAmountPattern);
+
+        var inputFormatter = new MoneyFormatterBuilder()
+                .appendAmount(MoneyAmountStyle.of(journal.getLocale()))
+                .toFormatter();
+        var startIndex = 0;
+
+        if (!matches.isEmpty()) {
+            var currencyStr = matches.get(0);
+            startIndex = currencyStr.length() + 1;
         }
-        return null;
+
+        var parsed = inputFormatter.parse(amountStr, startIndex);
+        var onlyAmount = parsed.getAmount();
+        var currency = CurrencyUnit.of(journal.getLocale());
+        if (onlyAmount != null) {
+            return Money.of(currency, onlyAmount);
+        } else {
+            return null;
+        }
     }
 
     private ArrayList<String> getMatches(String line, Pattern pattern) {

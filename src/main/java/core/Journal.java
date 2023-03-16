@@ -14,15 +14,23 @@ import java.util.stream.Collectors;
 
 public class Journal {
     private final List<Transaction> transactions;
-    private final CurrencyUnit defaultCurrency;
+    private final Locale locale;
 
     public Journal() {
-        transactions = new ArrayList<>();
-        defaultCurrency = CurrencyUnit.of(Locale.getDefault());
+        this(Locale.getDefault());
+    }
+
+    public Journal(Locale locale) {
+        this.transactions = new ArrayList<>();
+        this.locale = locale;
+    }
+
+    public Locale getLocale() {
+        return locale;
     }
 
     public CurrencyUnit getDefaultCurrency() {
-        return defaultCurrency;
+        return CurrencyUnit.of(locale);
     }
 
     public void addTransaction(Transaction transaction) {
@@ -43,7 +51,7 @@ public class Journal {
                 .flatMap(Collection::stream)
                 .filter(entry -> entry.account().getName().contains(accountName))
                 .map(Entry::amount)
-                .reduce(Money.zero(defaultCurrency), Money::plus);
+                .reduce(Money.zero(getDefaultCurrency()), Money::plus);
     }
 
     public Money getBalance(Account account) {
@@ -60,7 +68,7 @@ public class Journal {
                 .flatMap(Collection::stream)
                 .filter(e -> e.account().getName().contains(accountName))
                 .map(Entry::amount)
-                .reduce(Money.zero(defaultCurrency), Money::plus);
+                .reduce(Money.zero(getDefaultCurrency()), Money::plus);
     }
 
     public Money getBalance(Account account, String startDate, String endDate) {

@@ -105,8 +105,8 @@ class LedgerReaderTest {
         // no-status transaction
         var transaction3 = """
                 2023/03/07 Mike's convenience store
-                    Expenses:Groceries                         35.95
-                    Assets:Cash                               -35.95
+                    Expenses:Groceries                         35,95
+                    Assets:Cash                               -35,95
                 """;
 
         var date3 = LocalDate.parse("2023/03/07", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
@@ -125,7 +125,7 @@ class LedgerReaderTest {
         var expected = Money.of(currency, 2);
         assertEquals(expected, reader.parseAmount(amount));
 
-        amount = "2.95";
+        amount = "2,95";
         expected = Money.of(currency, 2.95);
         assertEquals(expected, reader.parseAmount(amount));
 
@@ -133,7 +133,7 @@ class LedgerReaderTest {
         expected = Money.of(currency, 2);
         assertEquals(expected, reader.parseAmount(amount));
 
-        amount = "EUR 2.95";
+        amount = "EUR 2,95";
         expected = Money.of(currency, 2.95);
         assertEquals(expected, reader.parseAmount(amount));
 
@@ -141,7 +141,7 @@ class LedgerReaderTest {
         expected = Money.of(currency, 2);
         assertEquals(expected, reader.parseAmount(amount));
 
-        amount = "2.95 EUR";
+        amount = "2,95 EUR";
         expected = Money.of(currency, 2.95);
         assertEquals(expected, reader.parseAmount(amount));
 
