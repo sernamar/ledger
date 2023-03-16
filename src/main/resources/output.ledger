@@ -1,0 +1,14 @@
+2023/03/06 * Opening Balance
+    Assets:Cash                                       500.00 CNY
+    Assets:Debit Card                                 500.00 CNY
+    Equity:Opening Balances                        -1,000.00 CNY
+
+2023/03/07 Moe's restaurant
+    Expenses:Restaurant:Food                           20.00 CNY
+    Expenses:Restaurant:Tips                            2.00 CNY
+    Assets:Cash                                       -12.00 CNY
+    Assets:Debit Card                                 -10.00 CNY
+
+2023/03/07 Mike's convenience store
+    Expenses:Groceries                                 35.95 CNY
+    Assets:Cash                                       -35.95 CNY

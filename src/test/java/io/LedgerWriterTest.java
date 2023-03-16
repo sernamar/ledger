@@ -19,13 +19,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class LedgerWriterTest {
     private LedgerWriter writer;
     private List<Transaction> transactions;
-    private CurrencyUnit currency;
 
     @BeforeEach
     void setUp() {
         writer = new LedgerWriter();
         transactions = new ArrayList<>();
-        currency = CurrencyUnit.of(Locale.getDefault());
+        var currency = CurrencyUnit.of(Locale.getDefault());
 
         var date1 = LocalDate.parse("2023/03/06", DateTimeFormatter.ofPattern("yyyy/MM/dd"));
         var status1 = TransactionStatus.CLEARED;
@@ -72,15 +71,15 @@ class LedgerWriterTest {
     @Test
     void buildEntry() {
         var entry1 = transactions.get(0).entries().get(0);
-        var expected1 = "    Assets:Cash                                       EUR 500.00";
-        assertEquals(expected1, writer.buildEntry(entry1));
+        var expected1 = "    Assets:Cash                                         500,00 €";
+        assertEquals(expected1, writer.buildEntry(entry1, Locale.getDefault()));
 
         var entry2 = transactions.get(1).entries().get(2);
-        var expected2 = "    Assets:Cash                                       EUR -12.00";
-        assertEquals(expected2, writer.buildEntry(entry2));
+        var expected2 = "    Assets:Cash                                         -12,00 €";
+        assertEquals(expected2, writer.buildEntry(entry2, Locale.getDefault()));
 
         var entry3 = transactions.get(2).entries().get(1);
-        var expected3 = "    Assets:Cash                                       EUR -35.95";
-        assertEquals(expected3, writer.buildEntry(entry3));
+        var expected3 = "    Assets:Cash                                         -35,95 €";
+        assertEquals(expected3, writer.buildEntry(entry3, Locale.getDefault()));
     }
 }

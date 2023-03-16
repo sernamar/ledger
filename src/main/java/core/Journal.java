@@ -2,6 +2,8 @@ package core;
 
 import org.joda.money.CurrencyUnit;
 import org.joda.money.Money;
+import org.joda.money.format.MoneyAmountStyle;
+import org.joda.money.format.MoneyFormatterBuilder;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -58,6 +60,15 @@ public class Journal {
         return getBalance(account.getName());
     }
 
+    public String getBalanceAsString(String accountName) {
+        var balance = getBalance(accountName);
+        return formatAmount(balance);
+    }
+
+    public String getBalanceAsString(Account account) {
+        return getBalanceAsString(account.getName());
+    }
+
     public Money getBalance(String accountName, String startDate, String endDate) {
         var start = LocalDate.parse(startDate, DateTimeFormatter.ofPattern("yyyy/MM/dd"));
         var end = LocalDate.parse(endDate, DateTimeFormatter.ofPattern("yyyy/MM/dd"));
@@ -75,6 +86,25 @@ public class Journal {
         return getBalance(account.getName(), startDate, endDate);
     }
 
+    public String getBalanceAsString(String accountName, String startDate, String endDate) {
+        var balance = getBalance(accountName, startDate,endDate);
+        return formatAmount(balance);
+    }
+
+    public String getBalanceAsString(Account account, String startDate, String endDate) {
+        var balance = getBalance(account.getName(), startDate,endDate);
+        return formatAmount(balance);
+    }
+
+    private String formatAmount(Money amount) {
+        var formatter = new MoneyFormatterBuilder()
+                .appendAmount(MoneyAmountStyle.of(locale))
+                .appendLiteral(" ")
+                .appendCurrencySymbolLocalized()
+                .toFormatter();
+        return formatter.print(amount);
+    }
+
     public String getBalanceReport(String accountName) {
         var report = new StringBuilder();
         var entries = transactions.stream()
@@ -84,11 +114,12 @@ public class Journal {
                 .toList();
         for (var entry : entries) {
             var name = entry.account().getName();
-            var amount = entry.amount();
+            var amount = formatAmount(entry.amount());
             report.append(String.format("  %s", amount)).append(String.format("  %s\n", name));
         }
         report.append("-----------------------------------------------------\n");
-        report.append(String.format("  %s\n", getBalance(accountName)));
+        var balance = formatAmount(getBalance(accountName));
+        report.append(String.format("  %s\n", balance));
 
         return report.toString();
     }
@@ -110,11 +141,12 @@ public class Journal {
                 .toList();
         for (var entry : entries) {
             var name = entry.account().getName();
-            var amount = entry.amount();
+            var amount = formatAmount(entry.amount());
             report.append(String.format("  %s", amount)).append(String.format("  %s\n", name));
         }
         report.append("-----------------------------------------------------\n");
-        report.append(String.format("  %s\n", getBalance(accountName, startDate, endDate)));
+        var balance = formatAmount(getBalance(accountName, startDate, endDate));
+        report.append(String.format("  %s\n", balance));
 
         return report.toString();
     }
@@ -191,9 +223,12 @@ public class Journal {
             var name = entry.account().getName();
             var amount = entry.amount();
             balance = (balance != null) ? balance.plus(amount) : amount;
-            entryBuilder.append(String.format("    %-50s", name))
-                    .append(String.format("  %-20s", amount))
-                    .append(String.format("  %s", balance))
+
+            var formattedAmount = formatAmount(amount);
+            var formattedBalance = formatAmount(balance);
+            entryBuilder.append(String.format("    %-40s", name))
+                    .append(String.format("%20s", formattedAmount))
+                    .append(String.format("%20s", formattedBalance))
                     .append("\n");
         }
         return entryBuilder.toString();
